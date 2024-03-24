@@ -1,9 +1,9 @@
 import {createElement} from '../render';
-import { createRouteStagesListTemplate } from '../template/route-stages-list-template';
+import { createRoutePointsListTemplate } from '../template/route-points-list-template';
 
-export default class NewRouteStagesView {
+export default class NewRoutePointsView {
   getTemplate() {
-    return createRouteStagesListTemplate();
+    return createRoutePointsListTemplate();
   }
 
   getElement() {
