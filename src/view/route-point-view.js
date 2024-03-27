@@ -1,9 +1,13 @@
 import {createElement} from '../render';
-import { createRouteStageTemplate } from '../template/route-stage-template';
+import { createRoutePointTemplate } from '../template/route-point-template';
 
-export default class NewRouteStageView {
+export default class NewRoutePointView {
+  constructor({routePoint}) {
+    this.routePoint = routePoint;
+  }
+
   getTemplate() {
-    return createRouteStageTemplate();
+    return createRoutePointTemplate(this.routePoint);
   }
 
   getElement() {
