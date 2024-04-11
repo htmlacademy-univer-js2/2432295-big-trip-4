@@ -1,4 +1,4 @@
-import {render, RenderPosition} from './render.js';
+import {render, RenderPosition} from './framework/render.js';
 import Presenter from './presenter/presenter.js';
 import Model from './model/model';
 

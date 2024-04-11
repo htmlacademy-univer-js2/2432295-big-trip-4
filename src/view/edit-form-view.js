@@ -1,25 +1,34 @@
-import {createElement} from '../render';
+import AbstractView from '../framework/view/abstract-view';
 import { createEditFormTemplate } from '../template/edit-form-template';
 import { POINT_EMPTY } from '../const';
 
-export default class NewEditFormView {
-  constructor({routePoint = POINT_EMPTY}) {
-    this.routePoint = routePoint;
+export default class NewEditFormView extends AbstractView{
+  constructor({routePoint = POINT_EMPTY, onSubmitClick, onRollUpClick}) {
+    super();
+    this.#routePoint = routePoint;
+
+    this.#handleSubmitClick = onSubmitClick;
+    this.#handleRollUpClick = onRollUpClick;
+
+    this.element.querySelector('.event--edit').addEventListener('submit', this.#submitClickHandler);
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollUpClickHandler);
   }
 
-  getTemplate() {
-    return createEditFormTemplate(this.routePoint);
-  }
+  #routePoint = null;
+  #handleSubmitClick = null;
+  #handleRollUpClick = null;
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
+  #submitClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleSubmitClick();
+  };
 
-    return this.element;
-  }
+  #rollUpClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleRollUpClick();
+  };
 
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createEditFormTemplate(this.#routePoint);
   }
 }

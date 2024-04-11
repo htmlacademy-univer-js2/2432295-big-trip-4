@@ -1,24 +1,24 @@
-import {createElement} from '../render';
+import AbstractView from '../framework/view/abstract-view';
 import { createRoutePointTemplate } from '../template/route-point-template';
 
-export default class NewRoutePointView {
-  constructor({routePoint}) {
-    this.routePoint = routePoint;
+export default class NewRoutePointView extends AbstractView{
+  constructor({routePoint, onEditClick}) {
+    super();
+    this.#routePoint = routePoint;
+
+    this.#handleEditClick = onEditClick;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
   }
 
-  getTemplate() {
-    return createRoutePointTemplate(this.routePoint);
-  }
+  #routePoint = null;
+  #handleEditClick = null;
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditClick();
+  };
 
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
+  get template() {
+    return createRoutePointTemplate(this.#routePoint);
   }
 }
