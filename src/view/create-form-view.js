@@ -1,20 +1,8 @@
-import {createElement} from '../render';
+import AbstractView from '../framework/view/abstract-view';
 import { createFormTemplate } from '../template/create-form-template';
 
-export default class NewCreateFormView {
-  getTemplate() {
+export default class NewCreateFormView extends AbstractView{
+  get template() {
     return createFormTemplate();
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
   }
 }

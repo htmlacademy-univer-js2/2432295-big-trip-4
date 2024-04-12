@@ -1,20 +1,8 @@
-import {createElement} from '../render';
+import AbstractView from '../framework/view/abstract-view';
 import { createRoutePointsListTemplate } from '../template/route-points-list-template';
 
-export default class NewRoutePointsView {
-  getTemplate() {
+export default class NewRoutePointsView extends AbstractView{
+  get template() {
     return createRoutePointsListTemplate();
-  }
-
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
   }
 }

@@ -1,17 +1,17 @@
-import {getRandomArrayElement} from '../utils';
-import {CITIES, DESCRIPTION, PHOTO_ADDRESS} from '../const';
+import { CITIES, DESCRIPTION, PHOTO_ADDRESS } from '../const';
 
-function getRandomDestination() {
-  const city = getRandomArrayElement(CITIES);
+function getRandomDestination(destination, id) {
   return {
-    id: crypto.randomUUID(),
+    id: id,
     description: DESCRIPTION,
-    name: city,
-    pictures: Array.from({length: Math.floor(Math.random() * 4) + 1}, () => ({
+    name: destination,
+    pictures: Array.from({ length: Math.floor(Math.random() * 4) + 1 }, () => ({
       src: PHOTO_ADDRESS + crypto.randomUUID(),
-      description: `${city} description`
+      description: `${destination} description`
     }))
   };
 }
 
-export {getRandomDestination};
+const generateDestinations = () => CITIES.map((city, id) => getRandomDestination(city, id));
+
+export { generateDestinations };

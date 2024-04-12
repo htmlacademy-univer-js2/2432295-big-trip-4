@@ -1,22 +1,25 @@
-import {POINT_TYPES, RANDOM_PRICE_MIN_LIMIT, RANDOM_PRICE_MAX_LIMIT, OFFERS_LIMIT} from '../const';
-import {getRandomArrayElement, getRandomNumber, getNewRandomValidDate} from '../utils';
-import {getRandomDestination} from './destinations';
-import {getRandomOffer} from './offers';
+import { POINT_TYPES, RANDOM_PRICE_MIN_LIMIT, RANDOM_PRICE_MAX_LIMIT, CITIES } from '../const';
+import { getRandomArrayElement, getRandomNumber, getNewRandomValidDate } from '../utils';
+import { generateDestinations } from './destinations';
+import { generateOffersByType } from './offers';
 
 function getRandomRoutePoint() {
-  const offersCount = Math.floor(Math.random() * OFFERS_LIMIT + 1);
+  const type = getRandomArrayElement(POINT_TYPES);
   const departureDate = getNewRandomValidDate();
 
+  const destinationId = getRandomArrayElement(generateDestinations()).id;
+  const offersId = generateOffersByType(type).map((offer) => offer.id);
+
   return {
-    id: crypto.randomUUID(),
+    id: getRandomNumber(0, CITIES.length),
     basePrice: getRandomNumber(RANDOM_PRICE_MIN_LIMIT, RANDOM_PRICE_MAX_LIMIT),
     dateFrom: departureDate,
     dateTo: getNewRandomValidDate(departureDate),
-    destination: getRandomDestination(),
+    destination: destinationId,
     isFavorite: Boolean(getRandomNumber(0, 1)),
-    offers: Array.from({length: offersCount}, () => (getRandomOffer())),
+    offers: offersId,
     type: getRandomArrayElement(POINT_TYPES)
   };
 }
 
-export {getRandomRoutePoint};
+export { getRandomRoutePoint };

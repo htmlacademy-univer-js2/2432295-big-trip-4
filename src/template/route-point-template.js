@@ -1,7 +1,7 @@
-import {getDateDuration, humanizeDate} from '../utils';
+import { getDateDuration, humanizeDate } from '../utils';
 
-export function createRoutePointTemplate(routePoint) {
-  const {basePrice, dateFrom, dateTo, destination, isFavorite, offers, type} = routePoint;
+export function createRoutePointTemplate(routePoint, destination, offers) {
+  const { basePrice, dateFrom, dateTo, isFavorite, type } = routePoint;
   const favoriteClassName = isFavorite ? 'event__favorite-btn--active' : '';
 
   return (
