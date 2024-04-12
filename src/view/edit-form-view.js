@@ -2,10 +2,12 @@ import AbstractView from '../framework/view/abstract-view';
 import { createEditFormTemplate } from '../template/edit-form-template';
 import { POINT_EMPTY } from '../const';
 
-export default class NewEditFormView extends AbstractView{
-  constructor({routePoint = POINT_EMPTY, onSubmitClick, onRollUpClick}) {
+export default class NewEditFormView extends AbstractView {
+  constructor({ routePoint = POINT_EMPTY, onSubmitClick, onRollUpClick, destination, offers }) {
     super();
     this.#routePoint = routePoint;
+    this.#destination = destination;
+    this.#offers = offers;
 
     this.#handleSubmitClick = onSubmitClick;
     this.#handleRollUpClick = onRollUpClick;
@@ -15,6 +17,9 @@ export default class NewEditFormView extends AbstractView{
   }
 
   #routePoint = null;
+  #destination = null;
+  #offers = null;
+
   #handleSubmitClick = null;
   #handleRollUpClick = null;
 
@@ -29,6 +34,6 @@ export default class NewEditFormView extends AbstractView{
   };
 
   get template() {
-    return createEditFormTemplate(this.#routePoint);
+    return createEditFormTemplate(this.#routePoint, this.#destination, this.#offers);
   }
 }

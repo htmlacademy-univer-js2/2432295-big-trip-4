@@ -1,8 +1,8 @@
 import {CITIES, POINT_TYPES} from '../const';
 import {getRandomNumber, humanizeDate} from '../utils';
 
-export function createEditFormTemplate(routePoint) {
-  const {basePrice, dateFrom, dateTo, destination, offers, type} = routePoint;
+export function createEditFormTemplate(routePoint, destination, offers) {
+  const {basePrice, dateFrom, dateTo, type} = routePoint;
 
   return (
     `<li class="trip-events__item">

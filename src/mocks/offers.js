@@ -1,7 +1,7 @@
-import {OFFERS, RANDOM_PRICE_MAX_LIMIT, RANDOM_PRICE_MIN_LIMIT} from '../const';
-import {getRandomArrayElement , getRandomNumber} from '../utils';
+import { OFFERS, OFFERS_LIMIT, RANDOM_PRICE_MAX_LIMIT, RANDOM_PRICE_MIN_LIMIT, POINT_TYPES } from '../const';
+import { getRandomArrayElement, getRandomNumber } from '../utils';
 
-function getRandomOffer() {
+function generateRandomOffer() {
   return {
     id: crypto.randomUUID(),
     title: getRandomArrayElement(OFFERS),
@@ -9,4 +9,13 @@ function getRandomOffer() {
   };
 }
 
-export {getRandomOffer};
+const offersByType = POINT_TYPES.map((type) => (
+  {
+    type,
+    offers: Array.from({ length: getRandomNumber(0, OFFERS_LIMIT) }, generateRandomOffer)
+  })
+);
+
+const generateOffersByType = () => offersByType;
+
+export { generateOffersByType };

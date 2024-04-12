@@ -1,6 +1,8 @@
-import {render, RenderPosition} from './framework/render.js';
+import { render, RenderPosition } from './framework/render.js';
 import Presenter from './presenter/presenter.js';
-import Model from './model/model';
+import PointsModel from './model/PointsModel.js';
+import OffersModel from './model/OffersModel.js';
+import DestinationsModel from './model/DestinationsModel.js';
 
 import NewTripInfoView from './view/trip-info-view.js';
 import NewFiltersView from './view/filters-view.js';
@@ -12,9 +14,15 @@ const siteBodyTripPointsList = bodyElement.querySelector('.trip-events');
 const siteHeaderTripMain = headerElement.querySelector('.trip-main');
 
 
-const model = new Model();
+const pointsModel = new PointsModel();
+const offersModel = new OffersModel();
+const destinationsModel = new DestinationsModel();
+
 const presenter = new Presenter({
-  container: siteBodyTripPointsList, model
+  container: siteBodyTripPointsList,
+  pointsModel,
+  offersModel,
+  destinationsModel
 });
 
 render(new NewTripInfoView(), siteHeaderTripMain, RenderPosition.AFTERBEGIN);
