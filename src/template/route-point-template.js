@@ -7,7 +7,7 @@ export function createRoutePointTemplate(routePoint, destination, offers) {
   return (
     `<li class="trip-events__item">
               <div class="event">
-                <time class="event__date" datetime="2019-03-18">MAR 18</time>
+              <time class="event__date" datetime="${ dateFrom }">${ humanizeDate(dateFrom, 'DD MMM') }</time>
                 <div class="event__type">
                   <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
                 </div>

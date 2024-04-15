@@ -1,7 +1,8 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import {MAXIMUM_MINUTE_DIFFERENCE, MAXIMUM_HOUR_DIFFERENCE, MAXIMUM_DAY_DIFFERENCE,
-  DATE_FORMAT, DATE_PERIODS} from './const';
+  DATE_FORMAT, DATE_PERIODS,
+} from './const';
 
 dayjs.extend(duration);
 
@@ -45,15 +46,45 @@ function getNewRandomValidDate(previousDate = 0) {
       .add(getRandomNumber(0, MAXIMUM_MINUTE_DIFFERENCE), 'minute')
       .toDate();
   } else {
+    const futureOrPast = Math.random() < 0.5 ? -1 : 1;
     date = dayjs()
-      .subtract(getRandomNumber(0, MAXIMUM_DAY_DIFFERENCE), 'day').toDate();
-  }
-
-  if (date < previousDate) {
-    throw new Error(`New date ${date} is less than the previous one ${previousDate}`);
+      .add(getRandomNumber(0, MAXIMUM_DAY_DIFFERENCE) * futureOrPast, 'day').toDate();
   }
 
   return date;
 }
 
-export {getRandomNumber, getRandomArrayElement, humanizeDate, getDateDuration, getNewRandomValidDate };
+function isFutureDate(dateFrom) {
+  return dayjs(dateFrom).isAfter(dayjs());
+}
+function isPastDate(dateTo) {
+  return dayjs(dateTo).isBefore(dayjs());
+}
+function isPresentDate(dateFrom, dateTo) {
+  const now = dayjs();
+  return now.isAfter(dayjs(dateFrom)) && now.isBefore(dayjs(dateTo));
+}
+
+function sortDay(firstPoint, secondPoint) {
+  const firstDate = dayjs(firstPoint.dateFrom);
+  const secondDate = dayjs(secondPoint.dateFrom);
+  return firstDate.isBefore(secondDate) ? -1 : 1;
+}
+function sortEvent(firstPoint, secondPoint) {
+  return firstPoint.type.toLowerCase().localeCompare(secondPoint.type.toLowerCase());
+}
+function sortTime(firstPoint, secondPoint) {
+  const firstDuration = dayjs(getDateDuration(firstPoint.dateFrom, firstPoint.dateTo)).unix();
+  const secondDuration = dayjs(getDateDuration(secondPoint.dateFrom, secondPoint.dateTo)).unix();
+  return firstDuration - secondDuration;
+}
+function sortPrice(firstPoint, secondPoint) {
+  return firstPoint.basePrice - secondPoint.basePrice;
+}
+function sortOffers(firstPoint, secondPoint) {
+  return firstPoint.offers.length - secondPoint.offers.length;
+}
+
+export { getRandomNumber, getRandomArrayElement, humanizeDate, getDateDuration, getNewRandomValidDate,
+  isFutureDate, isPastDate, isPresentDate,
+  sortDay, sortEvent, sortTime, sortPrice, sortOffers };

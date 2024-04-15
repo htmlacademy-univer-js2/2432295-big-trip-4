@@ -14,4 +14,6 @@ function getRandomDestination(destination, id) {
 
 const generateDestinations = () => CITIES.map((city, id) => getRandomDestination(city, id));
 
-export { generateDestinations };
+const getAllDestinations = () => CITIES;
+
+export { generateDestinations, getAllDestinations };
