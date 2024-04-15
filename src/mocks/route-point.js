@@ -11,7 +11,7 @@ function getRandomRoutePoint() {
   const offersId = generateOffersByType(type).map((offer) => offer.id);
 
   return {
-    id: getRandomNumber(0, CITIES.length),
+    id: getRandomNumber(0, CITIES.length - 1),
     basePrice: getRandomNumber(RANDOM_PRICE_MIN_LIMIT, RANDOM_PRICE_MAX_LIMIT),
     dateFrom: departureDate,
     dateTo: getNewRandomValidDate(departureDate),

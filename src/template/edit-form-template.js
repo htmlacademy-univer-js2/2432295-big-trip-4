@@ -1,21 +1,20 @@
-import {CITIES, POINT_TYPES} from '../const';
+import {POINT_TYPES} from '../const';
 import {getRandomNumber, humanizeDate} from '../utils';
 
-export function createEditFormTemplate(routePoint, destination, offers) {
+export function createEditFormTemplate(routePoint, destination, offers, allDestinations) {
   const {basePrice, dateFrom, dateTo, type} = routePoint;
-
   return (
     `<li class="trip-events__item">
               <form class="event event--edit" action="#" method="post">
                 <header class="event__header">
-                   ${createEventTypesList()}
+                   ${createEventTypesList(type)}
 
                   <div class="event__field-group  event__field-group--destination">
                     <label class="event__label  event__type-output" for="event-destination-1">
                       ${type}
                     </label>
                     <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
-                    ${createDestinationList()}
+                    ${createDestinationList(allDestinations)}
                   </div>
 
                   <div class="event__field-group  event__field-group--time">
@@ -54,11 +53,11 @@ export function createEditFormTemplate(routePoint, destination, offers) {
   );
 }
 
-function createEventTypesList() {
+function createEventTypesList(currentType) {
   return (`<div class="event__type-wrapper">
                     <label class="event__type  event__type-btn" for="event-type-toggle-1">
                       <span class="visually-hidden">Choose event type</span>
-                      <img class="event__type-icon" width="17" height="17" src="img/icons/flight.png" alt="Event type icon">
+                      <img class="event__type-icon" width="17" height="17" src="img/icons/${currentType}.png" alt="Event type icon">
                     </label>
                     <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
 
@@ -68,7 +67,7 @@ function createEventTypesList() {
 
                         ${POINT_TYPES.map((type) =>
       `<div class="event__type-item">
-                          <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}">
+                          <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${(type === currentType) ? 'checked' : ''}>
                           <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type[0].toUpperCase() + type.slice(1)}</label>
                         </div>`).join('')}
                       </fieldset>
@@ -76,9 +75,9 @@ function createEventTypesList() {
                   </div>`);
 }
 
-function createDestinationList() {
+function createDestinationList(allDestinations) {
   return (`<datalist id="destination-list-1">
-                ${CITIES.map((city) => `<option value="${city}"></option>`).join('')}
+                ${allDestinations.map((city) => `<option value="${city}"></option>`).join('')}
             </datalist>`);
 }
 

@@ -1,44 +1,79 @@
-import { render, replace } from '../framework/render.js';
+import { render, replace, RenderPosition } from '../framework/render.js';
+import { SITE_HEADER_FILTERS, SITE_HEADER_TRIP_MAIN } from '../const';
 
 import NewSortView from '../view/sort-view.js';
+import NewFiltersView from '../view/filters-view';
 import NewRoutePointsView from '../view/route-points-list-view.js';
 import NewRoutePointView from '../view/route-point-view.js';
 import NewEditFormView from '../view/edit-form-view.js';
-// import FilterView from '../view/filter-view.js';
-// import TripInfoView from '../view/trip-info-view.js';
-
+import NewTripInfoView from '../view/trip-info-view';
 
 export default class Presenter {
   constructor({ container, pointsModel, offersModel, destinationsModel }) {
     this.#container = container;
+
     this.#pointsModel = pointsModel;
     this.#offersModel = offersModel;
     this.#destinationsModel = destinationsModel;
   }
 
-  #routePoints = [];
-
-  #routePointsComponent = new NewRoutePointsView();
   #container = null;
   #pointsModel = null;
   #offersModel = null;
   #destinationsModel = null;
 
+  #filterViewComponent = null;
+  #routePointsComponent = null;
+  #sortViewComponent = null;
+
+  #routePoints = [];
+  #filteredRoutePoints = [];
+
+
   init() {
     this.#routePoints = [...this.#pointsModel.routePoints];
 
+    render(new NewTripInfoView(), SITE_HEADER_TRIP_MAIN, RenderPosition.AFTERBEGIN);
+
+    this.#renderFilter();
+    this.#renderSort();
     this.#renderRoutePointList();
   }
 
+  #renderFilter() {
+    this.#filterViewComponent = new NewFiltersView({
+      routePoints: this.#routePoints,
+      onFilterChange: () => {
+        this.#filterViewComponent.currentFilter.filter(this.#routePoints);
+        /*this.#filteredRoutePoints = this.#filterViewComponent.currentFilter.filter(this.#routePoints);
+        this.#renderRoutePointList();*/
+      }
+    });
+
+    this.#filteredRoutePoints = this.#filterViewComponent.currentFilter.filter(this.#routePoints);
+
+    render(this.#filterViewComponent, SITE_HEADER_FILTERS);
+  }
+
+  #renderSort() {
+    this.#sortViewComponent = new NewSortView({
+      onSortChange: () => {
+        this.#routePoints.sort(this.#sortViewComponent.currentSort);
+      }
+    });
+
+    render(this.#sortViewComponent, this.#container);
+    this.#filteredRoutePoints.sort(this.#sortViewComponent.currentSort);
+  }
+
   #renderRoutePointList() {
-    render(new NewSortView(), this.#container);
-    // render(new FilterView(), this.#container.filter);
-    // render(new TripInfoView({points: this.#tripPoints}), this.#container.tripInfo, RenderPosition.AFTERBEGIN);
+    this.#routePointsComponent = new NewRoutePointsView(this.#filteredRoutePoints,
+      this.#filterViewComponent.currentFilter.name);
 
     render(this.#routePointsComponent, this.#container);
 
-    for (let i = 0; i < this.#routePoints.length; i++) {
-      this.#renderRoutePoint(this.#routePoints[i]);
+    for (let i = 0; i < this.#filteredRoutePoints.length; i++) {
+      this.#renderRoutePoint(this.#filteredRoutePoints[i]);
     }
   }
 
@@ -58,7 +93,7 @@ export default class Presenter {
 
       onEditClick: () => {
         replacePointToForm();
-        document.removeEventListener('keydown', escKeyHandler);
+        document.addEventListener('keydown', escKeyHandler);
       }
     });
 
@@ -66,6 +101,7 @@ export default class Presenter {
       routePoint: routePoint,
       destination: this.#destinationsModel.getDestinationById(routePoint.id),
       offers: this.#offersModel.getOffersByType(routePoint.type),
+      allDestinations: this.#destinationsModel.allDestinations,
 
       onSubmitClick: () => {
         replaceEditToForm();
