@@ -1,4 +1,4 @@
-import { POINT_TYPES, RANDOM_PRICE_MIN_LIMIT, RANDOM_PRICE_MAX_LIMIT, CITIES } from '../const';
+import { POINT_TYPES, RANDOM_PRICE_MIN_LIMIT, RANDOM_PRICE_MAX_LIMIT } from '../const';
 import { getRandomArrayElement, getRandomNumber, getNewRandomValidDate } from '../utils';
 import { generateDestinations } from './destinations';
 import { generateOffersByType } from './offers';
@@ -11,7 +11,7 @@ function getRandomRoutePoint() {
   const offersId = generateOffersByType(type).map((offer) => offer.id);
 
   return {
-    id: getRandomNumber(0, CITIES.length - 1),
+    id: crypto.randomUUID(),
     basePrice: getRandomNumber(RANDOM_PRICE_MIN_LIMIT, RANDOM_PRICE_MAX_LIMIT),
     dateFrom: departureDate,
     dateTo: getNewRandomValidDate(departureDate),

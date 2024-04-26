@@ -128,11 +128,18 @@ const WARNING_MESSAGE = {
   [FILTER_TYPE.PAST]: 'There are no past events'
 };
 
-const BODY_ELEMENT = document.querySelector('body');
-const HEADER_ELEMENT = BODY_ELEMENT.querySelector('.page-header');
-const SITE_HEADER_FILTERS = HEADER_ELEMENT.querySelector('.trip-controls__filters');
-const SITE_BODY_TRIP_POINTS_LIST = BODY_ELEMENT.querySelector('.trip-events');
-const SITE_HEADER_TRIP_MAIN = HEADER_ELEMENT.querySelector('.trip-main');
+const container = {
+  body: document.body,
+  header: document.querySelector('.page-header'),
+  filter: document.querySelector('.trip-controls__filters'),
+  tripInfo: document.querySelector('.trip-main'),
+  events: document.querySelector('.trip-events')
+};
+
+const MODE = {
+  DEFAULT: 'default',
+  EDITING: 'editing',
+};
 
 export {DATE_FORMAT, DATE_PERIODS,
   RANDOM_PRICE_MAX_LIMIT, RANDOM_PRICE_MIN_LIMIT,
@@ -141,7 +148,8 @@ export {DATE_FORMAT, DATE_PERIODS,
   OFFERS_LIMIT, ROUTE_POINTS_COUNT,
   POINT_EMPTY,
   FILTER_OPTIONS, DEFAULT_FILTER, FILTER_TYPE,
-  BODY_ELEMENT, HEADER_ELEMENT, SITE_HEADER_FILTERS, SITE_BODY_TRIP_POINTS_LIST, SITE_HEADER_TRIP_MAIN,
+  container,
   SORT_OPTIONS, DEFAULT_SORT,
-  WARNING_MESSAGE
+  WARNING_MESSAGE,
+  MODE
 };

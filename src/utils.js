@@ -85,6 +85,11 @@ function sortOffers(firstPoint, secondPoint) {
   return firstPoint.offers.length - secondPoint.offers.length;
 }
 
+function updatePoint(points, updatedPoint) {
+  return points.map((point) => point.id === updatedPoint.id ? updatedPoint : point);
+}
+
 export { getRandomNumber, getRandomArrayElement, humanizeDate, getDateDuration, getNewRandomValidDate,
   isFutureDate, isPastDate, isPresentDate,
-  sortDay, sortEvent, sortTime, sortPrice, sortOffers };
+  sortDay, sortEvent, sortTime, sortPrice, sortOffers,
+  updatePoint };

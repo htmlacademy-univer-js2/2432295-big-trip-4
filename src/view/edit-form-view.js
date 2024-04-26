@@ -3,18 +3,17 @@ import { createEditFormTemplate } from '../template/edit-form-template';
 import { POINT_EMPTY } from '../const';
 
 export default class NewEditFormView extends AbstractView {
-  constructor({ routePoint = POINT_EMPTY, onSubmitClick, onRollUpClick, destination, offers, allDestinations }) {
+  constructor({ routePoint = POINT_EMPTY, destination, offers, allDestinations, onEditFormSubmitClick, onEditFormResetClick }) {
     super();
     this.#routePoint = routePoint;
     this.#destination = destination;
     this.#offers = offers;
     this.#allDestinations = allDestinations;
 
-    this.#handleSubmitClick = onSubmitClick;
-    this.#handleRollUpClick = onRollUpClick;
+    this.#handleEditFormSubmitClick = onEditFormSubmitClick;
+    this.#handleEditFormResetClick = onEditFormResetClick;
 
-    this.element.querySelector('.event--edit').addEventListener('submit', this.#submitClickHandler);
-    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#rollUpClickHandler);
+    this.#addEditFormHandlers();
   }
 
   #routePoint = null;
@@ -22,17 +21,26 @@ export default class NewEditFormView extends AbstractView {
   #offers = null;
   #allDestinations = null;
 
-  #handleSubmitClick = null;
-  #handleRollUpClick = null;
+  #handleEditFormSubmitClick = null;
+  #handleEditFormResetClick = null;
+
+  #addEditFormHandlers = () => {
+    this.element
+      .querySelector('.event__rollup-btn')
+      .addEventListener('click', this.#resetClickHandler);
+    this.element
+      .querySelector('.event--edit')
+      .addEventListener('submit', this.#submitClickHandler);
+  };
+
+  #resetClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleEditFormResetClick();
+  };
 
   #submitClickHandler = (evt) => {
     evt.preventDefault();
-    this.#handleSubmitClick();
-  };
-
-  #rollUpClickHandler = (evt) => {
-    evt.preventDefault();
-    this.#handleRollUpClick();
+    this.#handleEditFormSubmitClick();
   };
 
   get template() {
