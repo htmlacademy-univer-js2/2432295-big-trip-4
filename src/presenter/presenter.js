@@ -1,43 +1,57 @@
-import { render, replace, RenderPosition } from '../framework/render.js';
-import { SITE_HEADER_FILTERS, SITE_HEADER_TRIP_MAIN } from '../const';
+import { render, RenderPosition } from '../framework/render.js';
+import { updatePoint } from '../utils.js';
 
-import NewSortView from '../view/sort-view.js';
-import NewFiltersView from '../view/filters-view';
-import NewRoutePointsView from '../view/route-points-list-view.js';
-import NewRoutePointView from '../view/route-point-view.js';
-import NewEditFormView from '../view/edit-form-view.js';
 import NewTripInfoView from '../view/trip-info-view';
+import NewFiltersView from '../view/filters-view';
+import NewSortView from '../view/sort-view.js';
+import NewRoutePointsView from '../view/route-points-list-view.js';
+
+import RoutePointPresenter from './route-point-presenter';
 
 export default class Presenter {
-  constructor({ container, pointsModel, offersModel, destinationsModel }) {
+  constructor({ container, pointsModel, offerModel, destinationModel }) {
     this.#container = container;
 
     this.#pointsModel = pointsModel;
-    this.#offersModel = offersModel;
-    this.#destinationsModel = destinationsModel;
+    this.#offerModel = offerModel;
+    this.#destinationModel = destinationModel;
+
+    this.#routePoints = [...this.#pointsModel.routePoints];
+
+    this.#tripInfoViewComponent = new NewTripInfoView(this.#routePoints, this.#destinationModel);
+    //this.#filterViewComponent = new NewFiltersView(this.#routePoints);
+    //this.#sortViewComponent = new NewSortView();
+    this.#routePointsComponent = new NewRoutePointsView(this.#routePoints); // , this.#filterViewComponent.currentFilter.name
   }
 
   #container = null;
   #pointsModel = null;
-  #offersModel = null;
-  #destinationsModel = null;
+  #offerModel = null;
+  #destinationModel = null;
 
+  #tripInfoViewComponent = null;
   #filterViewComponent = null;
-  #routePointsComponent = null;
   #sortViewComponent = null;
+  #routePointsComponent = null;
 
   #routePoints = [];
   #filteredRoutePoints = [];
 
+  #routePointPresenters = new Map();
+
 
   init() {
-    this.#routePoints = [...this.#pointsModel.routePoints];
-
-    render(new NewTripInfoView(), SITE_HEADER_TRIP_MAIN, RenderPosition.AFTERBEGIN);
+    this.#renderTripInfo();
 
     this.#renderFilter();
     this.#renderSort();
+
     this.#renderRoutePointList();
+    this.#renderRoutePoints();
+  }
+
+  #renderTripInfo() {
+    render(this.#tripInfoViewComponent, this.#container.tripInfo, RenderPosition.AFTERBEGIN);
   }
 
   #renderFilter() {
@@ -45,14 +59,14 @@ export default class Presenter {
       routePoints: this.#routePoints,
       onFilterChange: () => {
         this.#filterViewComponent.currentFilter.filter(this.#routePoints);
-        /*this.#filteredRoutePoints = this.#filterViewComponent.currentFilter.filter(this.#routePoints);
-        this.#renderRoutePointList();*/
+        //this.#filteredRoutePoints = this.#filterViewComponent.currentFilter.filter(this.#routePoints);
+        //this.#renderRoutePointList();
       }
     });
 
-    this.#filteredRoutePoints = this.#filterViewComponent.currentFilter.filter(this.#routePoints);
+    //this.#filteredRoutePoints = this.#filterViewComponent.currentFilter.filter(this.#routePoints);
 
-    render(this.#filterViewComponent, SITE_HEADER_FILTERS);
+    render(this.#filterViewComponent, this.#container.filter);
   }
 
   #renderSort() {
@@ -62,65 +76,46 @@ export default class Presenter {
       }
     });
 
-    render(this.#sortViewComponent, this.#container);
-    this.#filteredRoutePoints.sort(this.#sortViewComponent.currentSort);
+    render(this.#sortViewComponent, this.#container.events);
+    //this.#filteredRoutePoints.sort(this.#sortViewComponent.currentSort);
   }
 
   #renderRoutePointList() {
-    this.#routePointsComponent = new NewRoutePointsView(this.#filteredRoutePoints,
-      this.#filterViewComponent.currentFilter.name);
+    /*this.#routePointsComponent = new NewRoutePointsView(this.#filteredRoutePoints,
+      this.#filterViewComponent.currentFilter.name);*/
 
-    render(this.#routePointsComponent, this.#container);
-
-    for (let i = 0; i < this.#filteredRoutePoints.length; i++) {
-      this.#renderRoutePoint(this.#filteredRoutePoints[i]);
-    }
+    render(this.#routePointsComponent, this.#container.events);
   }
 
-  #renderRoutePoint(routePoint) {
-    const escKeyHandler = (evt) => {
-      if (evt.key === 'Escape' || evt.key === 'Esc') {
-        evt.preventDefault();
-        replaceEditToForm();
-        document.removeEventListener('keydown', escKeyHandler);
-      }
-    };
-
-    const routePointComponent = new NewRoutePointView({
-      routePoint: routePoint,
-      destination: this.#destinationsModel.getDestinationById(routePoint.id),
-      offers: this.#offersModel.getOffersByType(routePoint.type),
-
-      onEditClick: () => {
-        replacePointToForm();
-        document.addEventListener('keydown', escKeyHandler);
-      }
-    });
-
-    const editRoutePointComponent = new NewEditFormView({
-      routePoint: routePoint,
-      destination: this.#destinationsModel.getDestinationById(routePoint.id),
-      offers: this.#offersModel.getOffersByType(routePoint.type),
-      allDestinations: this.#destinationsModel.allDestinations,
-
-      onSubmitClick: () => {
-        replaceEditToForm();
-        document.removeEventListener('keydown', escKeyHandler);
-      },
-      onRollUpClick: () => {
-        replaceEditToForm();
-        document.removeEventListener('keydown', escKeyHandler);
-      }
-    });
-
-    function replacePointToForm() {
-      replace(editRoutePointComponent, routePointComponent);
-    }
-
-    function replaceEditToForm() {
-      replace(routePointComponent, editRoutePointComponent);
-    }
-
-    render(routePointComponent, this.#routePointsComponent.element);
+  #renderRoutePoints() {
+    this.#routePoints.forEach((routePoint) => this.#renderRoutePoint(routePoint));
   }
+
+  #renderRoutePoint = (routePoint) => {
+    const routePointPresenter = new RoutePointPresenter({
+      routePointListcontainer: this.#routePointsComponent.element,
+      offersModel: this.#offerModel,
+      destinationsModel: this.#destinationModel,
+
+      onDataChange: this.#handlePointChange,
+      onModeChange: this.#handleModeChange,
+    });
+
+    routePointPresenter.init(routePoint);
+    this.#routePointPresenters.set(routePoint.id, routePointPresenter);
+  };
+
+  #handlePointChange = (updatedPoint) => {
+    this.#routePoints = updatePoint(this.#routePoints, updatedPoint);
+    this.#routePointPresenters.get(updatedPoint.id).init(updatedPoint);
+  };
+
+  #handleModeChange = () => {
+    this.#routePointPresenters.forEach((routePointPresenter) => routePointPresenter.initialStateView());
+  };
+
+  #clearPoints = () => {
+    this.#routePointPresenters.forEach((presenter) => presenter.destroy());
+    this.#routePointPresenters.clear();
+  };
 }
