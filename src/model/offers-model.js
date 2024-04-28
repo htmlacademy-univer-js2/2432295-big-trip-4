@@ -1,8 +1,8 @@
-import { generateOffersByType } from '../mocks/offers';
+import { getOffers } from '../mocks/offers';
 
 export default class OffersModel {
   constructor() {
-    this.#offers = generateOffersByType();
+    this.#offers = getOffers();
   }
 
   #offers = null;

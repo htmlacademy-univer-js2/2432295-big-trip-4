@@ -1,11 +1,11 @@
 import { render, RenderPosition } from '../framework/render.js';
-import { updatePoint } from '../utils.js';
+import { updatePoint, sortPoints } from '../utils.js';
 
 import NewTripInfoView from '../view/trip-info-view';
-import NewFiltersView from '../view/filters-view';
-import NewSortView from '../view/sort-view.js';
 import NewRoutePointsView from '../view/route-points-list-view.js';
 
+import FilterPresenter from './filter-presenter.js';
+import SortPresenter from './sort-presenter.js';
 import RoutePointPresenter from './route-point-presenter';
 
 export default class Presenter {
@@ -16,12 +16,10 @@ export default class Presenter {
     this.#offerModel = offerModel;
     this.#destinationModel = destinationModel;
 
-    this.#routePoints = [...this.#pointsModel.routePoints];
+    this.#routePoints = sortPoints([...this.#pointsModel.routePoints]);
 
     this.#tripInfoViewComponent = new NewTripInfoView(this.#routePoints, this.#destinationModel);
-    //this.#filterViewComponent = new NewFiltersView(this.#routePoints);
-    //this.#sortViewComponent = new NewSortView();
-    this.#routePointsComponent = new NewRoutePointsView(this.#routePoints); // , this.#filterViewComponent.currentFilter.name
+    this.#routePointsComponent = new NewRoutePointsView(this.#routePoints);
   }
 
   #container = null;
@@ -30,12 +28,9 @@ export default class Presenter {
   #destinationModel = null;
 
   #tripInfoViewComponent = null;
-  #filterViewComponent = null;
-  #sortViewComponent = null;
   #routePointsComponent = null;
 
   #routePoints = [];
-  #filteredRoutePoints = [];
 
   #routePointPresenters = new Map();
 
@@ -55,35 +50,31 @@ export default class Presenter {
   }
 
   #renderFilter() {
-    this.#filterViewComponent = new NewFiltersView({
-      routePoints: this.#routePoints,
-      onFilterChange: () => {
-        this.#filterViewComponent.currentFilter.filter(this.#routePoints);
-        //this.#filteredRoutePoints = this.#filterViewComponent.currentFilter.filter(this.#routePoints);
-        //this.#renderRoutePointList();
-      }
+    const filterPresenter = new FilterPresenter({
+      container: this.#container.filter,
+      routePoints: this.#routePoints
     });
 
-    //this.#filteredRoutePoints = this.#filterViewComponent.currentFilter.filter(this.#routePoints);
-
-    render(this.#filterViewComponent, this.#container.filter);
+    filterPresenter.init();
   }
 
   #renderSort() {
-    this.#sortViewComponent = new NewSortView({
-      onSortChange: () => {
-        this.#routePoints.sort(this.#sortViewComponent.currentSort);
-      }
+    const sortPresenter = new SortPresenter({
+      container: this.#container.events,
+      handleSortTypeChange: this.#handleSortTypeChange,
     });
 
-    render(this.#sortViewComponent, this.#container.events);
-    //this.#filteredRoutePoints.sort(this.#sortViewComponent.currentSort);
+    sortPresenter.init();
   }
 
-  #renderRoutePointList() {
-    /*this.#routePointsComponent = new NewRoutePointsView(this.#filteredRoutePoints,
-      this.#filterViewComponent.currentFilter.name);*/
+  #handleSortTypeChange = (sortType) => {
+    this.#routePoints = sortPoints(this.#routePoints, sortType);
+    this.#clearRoutePoints();
+    this.#renderRoutePoints();
+  };
 
+
+  #renderRoutePointList() {
     render(this.#routePointsComponent, this.#container.events);
   }
 
@@ -114,8 +105,8 @@ export default class Presenter {
     this.#routePointPresenters.forEach((routePointPresenter) => routePointPresenter.initialStateView());
   };
 
-  #clearPoints = () => {
-    this.#routePointPresenters.forEach((presenter) => presenter.destroy());
+  #clearRoutePoints = () => {
+    this.#routePointPresenters.forEach((routePointPresenter) => routePointPresenter.destroy());
     this.#routePointPresenters.clear();
   };
 }

@@ -1,8 +1,8 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import {MAXIMUM_MINUTE_DIFFERENCE, MAXIMUM_HOUR_DIFFERENCE, MAXIMUM_DAY_DIFFERENCE,
+import { MAXIMUM_MINUTE_DIFFERENCE, MAXIMUM_HOUR_DIFFERENCE, MAXIMUM_DAY_DIFFERENCE,
   DATE_FORMAT, DATE_PERIODS,
-} from './const';
+  SORT_TYPE, SORT_OPTIONS } from './const';
 
 dayjs.extend(duration);
 
@@ -65,31 +65,24 @@ function isPresentDate(dateFrom, dateTo) {
   return now.isAfter(dayjs(dateFrom)) && now.isBefore(dayjs(dateTo));
 }
 
-function sortDay(firstPoint, secondPoint) {
-  const firstDate = dayjs(firstPoint.dateFrom);
-  const secondDate = dayjs(secondPoint.dateFrom);
-  return firstDate.isBefore(secondDate) ? -1 : 1;
-}
-function sortEvent(firstPoint, secondPoint) {
-  return firstPoint.type.toLowerCase().localeCompare(secondPoint.type.toLowerCase());
-}
-function sortTime(firstPoint, secondPoint) {
-  const firstDuration = dayjs(getDateDuration(firstPoint.dateFrom, firstPoint.dateTo)).unix();
-  const secondDuration = dayjs(getDateDuration(secondPoint.dateFrom, secondPoint.dateTo)).unix();
-  return firstDuration - secondDuration;
-}
-function sortPrice(firstPoint, secondPoint) {
-  return firstPoint.basePrice - secondPoint.basePrice;
-}
-function sortOffers(firstPoint, secondPoint) {
-  return firstPoint.offers.length - secondPoint.offers.length;
-}
+
+const getRoutePointsDayDiff = (firstPoint, secondPoint) => dayjs(firstPoint.dateFrom).diff(dayjs(secondPoint.dateFrom));
+const getRoutePointsEventDiff = (firstPoint, secondPoint) => firstPoint.type.localeCompare(secondPoint.type);
+const getRoutePointsPriceDiff = (firstPoint, secondPoint) => secondPoint.basePrice - firstPoint.basePrice;
+const getRoutePointsDurationDiff = (firstPoint, secondPoint) => dayjs(secondPoint.dateTo).diff(dayjs(secondPoint.dateFrom))
+- dayjs(firstPoint.dateTo).diff(dayjs(firstPoint.dateFrom));
+const getRoutePointsOfferDiff = (firstPoint, secondPoint) => firstPoint.offers.length - secondPoint.offers.length;
+
+const sortPoints = (points, sortType = SORT_TYPE.DAY) => SORT_OPTIONS[sortType](points);
+
 
 function updatePoint(points, updatedPoint) {
   return points.map((point) => point.id === updatedPoint.id ? updatedPoint : point);
 }
 
+
 export { getRandomNumber, getRandomArrayElement, humanizeDate, getDateDuration, getNewRandomValidDate,
   isFutureDate, isPastDate, isPresentDate,
-  sortDay, sortEvent, sortTime, sortPrice, sortOffers,
+  getRoutePointsDayDiff, getRoutePointsEventDiff, getRoutePointsPriceDiff, getRoutePointsDurationDiff, getRoutePointsOfferDiff,
+  sortPoints,
   updatePoint };

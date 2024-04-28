@@ -1,17 +1,22 @@
-import {SORT_OPTIONS, DEFAULT_SORT} from '../const';
-
-function createSortItems() {
-  return Object.keys(SORT_OPTIONS).map((sortName) =>
-    `<div class="trip-sort__item  trip-sort__item--${sortName.toLowerCase()}">
-        <input id="sort-${sortName.toLowerCase()}" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-${sortName.toLowerCase()}" ${DEFAULT_SORT === SORT_OPTIONS[sortName] ? 'checked' : ''}>
-        <label class="trip-sort__btn" for="sort-${sortName.toLowerCase()}">${sortName.charAt(0).toUpperCase() + sortName.slice(1)}</label>
-     </div>`).join('');
+function createSortItems({ sorts }) {
+  return sorts.map(({ type, isDisabled, isChecked }) => `
+      <div class="trip-sort__item  trip-sort__item--${type}">
+        <input
+        id="sort-${type}"
+        value="sort-${type}"
+        data-sort-type="${type}"
+        class="trip-sort__input  visually-hidden" type="radio" name="trip-sort"
+        ${isDisabled ? 'disabled' : ''}
+        ${isChecked ? 'checked' : ''}>
+        <label class="trip-sort__btn" for="sort-${type}">${type}</label>
+      </div>
+    `).join('');
 }
 
-export function createSortTemplate() {
+export function createSortTemplate({ sorts }) {
   return (
     `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
-    ${createSortItems()}
+      ${createSortItems({ sorts })}
     </form>`
   );
 }

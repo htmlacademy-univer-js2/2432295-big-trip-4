@@ -1,5 +1,6 @@
 import { isFutureDate, isPastDate, isPresentDate,
-  sortDay, sortEvent, sortTime, sortPrice, sortOffers } from './utils';
+  getRoutePointsDayDiff, getRoutePointsEventDiff, getRoutePointsPriceDiff, getRoutePointsDurationDiff, getRoutePointsOfferDiff
+} from './utils';
 
 const DESCRIPTION = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetra. Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante. ';
 
@@ -88,38 +89,46 @@ const POINT_EMPTY = {
   type: DEFAULT_TYPE
 };
 
+
 const FILTER_TYPE = {
   EVERYTHING: 'everything',
   FUTURE: 'future',
   PRESENT: 'present',
   PAST: 'past',
 };
+
 const FILTER_OPTIONS = {
   [FILTER_TYPE.EVERYTHING]: (points) => points,
   [FILTER_TYPE.FUTURE]: (points) => points.filter((point) => isFutureDate(point.dateFrom)),
   [FILTER_TYPE.PRESENT]: (points) => points.filter((point) => isPresentDate(point.dateFrom, point.dateTo)),
   [FILTER_TYPE.PAST]: (points) => points.filter((point) => isPastDate(point.dateTo)),
 };
-const DEFAULT_FILTER = {
-  name: FILTER_TYPE.EVERYTHING,
-  filter: FILTER_OPTIONS[FILTER_TYPE.EVERYTHING]
-};
+
 
 const SORT_TYPE = {
   DAY: 'day',
   EVENT: 'event',
   TIME: 'time',
   PRICE: 'price',
-  OFFERS: 'offers'
+  OFFER: 'offer'
 };
+
 const SORT_OPTIONS = {
-  [SORT_TYPE.DAY]: sortDay,
-  [SORT_TYPE.EVENT]: sortEvent,
-  [SORT_TYPE.TIME]: sortTime,
-  [SORT_TYPE.PRICE]: sortPrice,
-  [SORT_TYPE.OFFERS]: sortOffers
+  [SORT_TYPE.DAY]: (routePoints) => routePoints.sort(getRoutePointsDayDiff),
+  [SORT_TYPE.EVENT]: (routePoints) => routePoints.sort(getRoutePointsEventDiff),
+  [SORT_TYPE.PRICE]: (routePoints) => routePoints.sort(getRoutePointsPriceDiff),
+  [SORT_TYPE.TIME]: (routePoints) => routePoints.sort(getRoutePointsDurationDiff),
+  [SORT_TYPE.OFFER]: (routePoints) => routePoints.sort(getRoutePointsOfferDiff),
 };
-const DEFAULT_SORT = SORT_TYPE[SORT_TYPE.DAY];
+
+const ENABLED_SORT_TYPE = {
+  [SORT_TYPE.DAY]: true,
+  [SORT_TYPE.EVENT]: true,
+  [SORT_TYPE.TIME]: true,
+  [SORT_TYPE.PRICE]: true,
+  [SORT_TYPE.OFFER]: false,
+};
+
 
 const WARNING_MESSAGE = {
   [FILTER_TYPE.EVERYTHING]: 'Click New Event to create your first',
@@ -129,8 +138,6 @@ const WARNING_MESSAGE = {
 };
 
 const container = {
-  body: document.body,
-  header: document.querySelector('.page-header'),
   filter: document.querySelector('.trip-controls__filters'),
   tripInfo: document.querySelector('.trip-main'),
   events: document.querySelector('.trip-events')
@@ -147,9 +154,9 @@ export {DATE_FORMAT, DATE_PERIODS,
   MAXIMUM_MINUTE_DIFFERENCE, MAXIMUM_HOUR_DIFFERENCE, MAXIMUM_DAY_DIFFERENCE,
   OFFERS_LIMIT, ROUTE_POINTS_COUNT,
   POINT_EMPTY,
-  FILTER_OPTIONS, DEFAULT_FILTER, FILTER_TYPE,
+  FILTER_TYPE, FILTER_OPTIONS,
+  SORT_TYPE, SORT_OPTIONS, ENABLED_SORT_TYPE,
   container,
-  SORT_OPTIONS, DEFAULT_SORT,
   WARNING_MESSAGE,
   MODE
 };
