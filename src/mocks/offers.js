@@ -16,6 +16,8 @@ const offersByType = POINT_TYPES.map((type) => (
   })
 );
 
-const generateOffersByType = () => offersByType;
+const getOffers = () => offersByType;
 
-export { generateOffersByType };
+const generateOffersByType = (type) => offersByType.find((offer) => offer.type === type).offers;
+
+export { getOffers, generateOffersByType };
