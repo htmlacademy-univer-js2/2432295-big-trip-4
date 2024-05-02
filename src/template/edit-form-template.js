@@ -1,8 +1,11 @@
-import {POINT_TYPES} from '../const';
-import {getRandomNumber, humanizeDate} from '../utils';
+import { POINT_TYPES } from '../const';
+import { getRandomNumber, humanizeDate } from '../utils';
 
-export function createEditFormTemplate(routePoint, destination, offers, allDestinations) {
-  const {basePrice, dateFrom, dateTo, type} = routePoint;
+export function createEditFormTemplate(routePoint, destinations, offers) {
+  const { basePrice, dateFrom, dateTo, type } = routePoint;
+  const currentDestination = destinations.find((destination) => destination.id === routePoint.destination);
+  const currentOffers = offers.find((offer) => offer.type === type).offers;
+
   return (
     `<li class="trip-events__item">
               <form class="event event--edit" action="#" method="post">
@@ -13,8 +16,8 @@ export function createEditFormTemplate(routePoint, destination, offers, allDesti
                     <label class="event__label  event__type-output" for="event-destination-1">
                       ${type}
                     </label>
-                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.name}" list="destination-list-1">
-                    ${createDestinationList(allDestinations)}
+                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${currentDestination.name}" list="destination-list-1">
+                    ${createDestinationList(destinations)}
                   </div>
 
                   <div class="event__field-group  event__field-group--time">
@@ -40,12 +43,12 @@ export function createEditFormTemplate(routePoint, destination, offers, allDesti
                   </button>
                 </header>
                 <section class="event__details">
-                    ${createOffersList(offers)}
+                    ${createOffersList(currentOffers)}
 
                   <section class="event__section  event__section--destination">
-                    <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-                    <p class="event__destination-description">${destination.description}</p>
-                    ${createPhotosList(destination.pictures)}
+                    <h3 class="event__section-title  event__section-title--destination">${ currentDestination.name }</h3>
+                    <p class="event__destination-description">${ currentDestination.description }</p>
+                    ${createPhotosList(currentDestination.pictures)}
                   </section>
                 </section>
               </form>
@@ -75,22 +78,22 @@ function createEventTypesList(currentType) {
                   </div>`);
 }
 
-function createDestinationList(allDestinations) {
+function createDestinationList(destinations) {
   return (`<datalist id="destination-list-1">
-                ${allDestinations.map((city) => `<option value="${city}"></option>`).join('')}
+                ${destinations.map((city) => `<option value="${city.name}"></option>`).join('')}
             </datalist>`);
 }
 
-function createOffersList(offers) {
-  const offersList = offers.map((offer) =>
+function createOffersList(currentOffers) {
+  const offersList = currentOffers.map((offer) =>
     `<div class="event__offer-selector">
-                        <input class="event__offer-checkbox  visually-hidden" id="${offer.id}" type="checkbox" name="event-offer-luggage" ${getCheckedOrNot()}>
-                        <label class="event__offer-label" for="event-offer-luggage-1">
-                          <span class="event__offer-title">${offer.title}</span>
-                          &plus;&euro;&nbsp;
-                          <span class="event__offer-price">${offer.price}</span>
-                        </label>
-                      </div>`).join('');
+      <input class="event__offer-checkbox  visually-hidden" id="${offer.id}" type="checkbox" name="event-offer-luggage" ${getCheckedOrNot()}>
+      <label class="event__offer-label" for="${offer.id}">
+        <span class="event__offer-title">${offer.title}</span>
+        &plus;&euro;&nbsp;
+        <span class="event__offer-price">${offer.price}</span>
+      </label>
+    </div>`).join('');
 
   return (`<section class="event__section  event__section--offers">
                     <h3 class="event__section-title  event__section-title--offers">Offers</h3>
@@ -100,7 +103,7 @@ function createOffersList(offers) {
            </section>`);
 }
 
-function getCheckedOrNot(){
+function getCheckedOrNot() {
   const isChecked = Boolean(getRandomNumber(0, 1));
   return isChecked ? 'checked' : '';
 }
