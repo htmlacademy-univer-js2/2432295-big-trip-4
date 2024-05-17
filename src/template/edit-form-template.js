@@ -43,17 +43,26 @@ export function createEditFormTemplate(routePoint, destinations, offers) {
                   </button>
                 </header>
                 <section class="event__details">
-                    ${createOffersList(currentOffers)}
-
-                  <section class="event__section  event__section--destination">
-                    <h3 class="event__section-title  event__section-title--destination">${ currentDestination.name }</h3>
-                    <p class="event__destination-description">${ currentDestination.description }</p>
-                    ${createPhotosList(currentDestination.pictures)}
-                  </section>
+                    ${(currentOffers.length !== 0) ? createOffersList(currentOffers) : ''}
+                    ${(currentDestination) ? createDestinationTemplate(currentDestination) : ''}
                 </section>
               </form>
             </li>`
   );
+}
+
+function createDestinationTemplate(currentDestination) {
+  if (
+    !currentDestination.description.length
+    && !currentDestination.pictures.length) {
+    return '';
+  }
+
+  return (`<section class="event__section  event__section--destination">
+            <h3 class="event__section-title  event__section-title--destination">${currentDestination.name}</h3>
+            <p class="event__destination-description">${currentDestination.description}</p>
+            ${createPhotosList(currentDestination.pictures)}
+            </section>`);
 }
 
 function createEventTypesList(currentType) {
@@ -87,7 +96,7 @@ function createDestinationList(destinations) {
 function createOffersList(currentOffers) {
   const offersList = currentOffers.map((offer) =>
     `<div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="${offer.id}" type="checkbox" name="event-offer-luggage" ${getCheckedOrNot()}>
+      <input class="event__offer-checkbox  visually-hidden" data-offer-id="${offer.id}" id="${offer.id}" type="checkbox" name="event-offer-luggage" ${getCheckedOrNot()}>
       <label class="event__offer-label" for="${offer.id}">
         <span class="event__offer-title">${offer.title}</span>
         &plus;&euro;&nbsp;
@@ -96,10 +105,10 @@ function createOffersList(currentOffers) {
     </div>`).join('');
 
   return (`<section class="event__section  event__section--offers">
-                    <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-                    <div class="event__available-offers">
-                    ${offersList}
-                    </div>
+              <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+              <div class="event__available-offers">
+              ${offersList}
+              </div>
            </section>`);
 }
 

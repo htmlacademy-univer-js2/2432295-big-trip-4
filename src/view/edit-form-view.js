@@ -2,6 +2,9 @@ import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { createEditFormTemplate } from '../template/edit-form-template';
 import { POINT_EMPTY } from '../const';
 
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
+
 export default class NewEditFormView extends AbstractStatefulView {
   constructor({ routePoint = POINT_EMPTY, destinations, offers, onEditFormSubmitClick, onEditFormResetClick }) {
     super();
@@ -20,6 +23,9 @@ export default class NewEditFormView extends AbstractStatefulView {
 
   #handleEditFormSubmitClick = null;
   #handleEditFormResetClick = null;
+
+  #datepickerFrom = null;
+  #datepickerTo = null;
 
 
   static parsePointToState = ({ routePoint }) => ({ routePoint });
@@ -49,7 +55,9 @@ export default class NewEditFormView extends AbstractStatefulView {
 
     this.element
       .querySelector('.event__available-offers')
-      .addEventListener('change', this.#offerChangeHandler);
+      ?.addEventListener('change', this.#offerChangeHandler);
+
+    this.#setDatepickers();
   };
 
 
@@ -67,7 +75,7 @@ export default class NewEditFormView extends AbstractStatefulView {
     this._setState({
       routePoint: {
         ...this._state.routePoint,
-        basePrice: evt.target.value,
+        basePrice: evt.target.valueAsNumber,
       }
     });
   };
@@ -78,13 +86,15 @@ export default class NewEditFormView extends AbstractStatefulView {
       routePoint: {
         ...this._state.routePoint,
         type: evt.target.value,
-        offers: [], //
+        offers: []
       },
     });
   };
 
   #destinationChangeHandler = (evt) => {
-    const destinationId = this.#destinations.find((destination) => destination.name === evt.target.value).id;
+    const destinationId = this.#destinations
+      .find((destination) => destination.name === evt.target.value).id;
+
     this.updateElement({
       routePoint: {
         ...this._state.routePoint,
@@ -95,7 +105,8 @@ export default class NewEditFormView extends AbstractStatefulView {
 
   #offerChangeHandler = () => {
     const offersId = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'))
-      .map(({ id }) => id.split('-').slice(3).join('-'));
+      .map((checkbox) => checkbox.dataset.offerId);
+
 
     this._setState({
       routePoint: {
@@ -106,12 +117,83 @@ export default class NewEditFormView extends AbstractStatefulView {
   };
 
 
+  #setDatepickers = () => {
+    const [dateFromElement, dateToElement] = this.element.querySelectorAll('.event__input--time');
+    const config = {
+      enableTime: true,
+      dateFormat: 'd/m/y H:i',
+      locale: {
+        firstDayOfWeek: 1,
+      },
+      'time_24hr': true
+    };
+
+    if (this._state.routePoint.dateFrom) {
+      this.#datepickerFrom = flatpickr(
+        dateFromElement,
+        {
+          ...config,
+          defaultDate: this._state.dateFrom,
+          maxDate: this._state.dateTo,
+          onClose: this.#routePointDateFromCloseHandler,
+        },
+      );
+    }
+
+    if (this._state.routePoint.dateTo) {
+      this.#datepickerTo = flatpickr(
+        dateToElement,
+        {
+          ...config,
+          defaultDate: this._state.dateTo,
+          minDate: this._state.dateFrom,
+          onClose: this.#routePointDateToCloseHandler,
+        },
+      );
+    }
+  };
+
+
+  #routePointDateFromCloseHandler = ([userDate]) => {
+    this._setState({
+      routePoint:{
+        ...this._state.routePoint,
+        dateFrom: userDate
+      }
+    });
+    this.#datepickerTo.set('minDate', this._state.routePoint.dateFrom);
+  };
+
+  #routePointDateToCloseHandler = ([userDate]) => {
+    this._setState({
+      routePoint:{
+        ...this._state.routePoint,
+        dateFrom: userDate
+      }
+    });
+    this.#datepickerFrom.set('maxDate', this._state.routePoint.dateFrom);
+  };
+
+
+  removeElement = () => {
+    super.removeElement();
+
+    if (this.#datepickerFrom) {
+      this.#datepickerFrom.destroy();
+      this.#datepickerFrom = null;
+    }
+    if (this.#datepickerTo) {
+      this.#datepickerTo.destroy();
+      this.#datepickerTo = null;
+    }
+  };
+
+
   reset(routePoint) {
     this.updateElement({
       routePoint
     });
   }
-
 
   get template() {
     return createEditFormTemplate(this._state.routePoint, this.#destinations, this.#offers);
