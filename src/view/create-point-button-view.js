@@ -14,12 +14,12 @@ export default class CreatePointButtonView extends AbstractView { //all
     return createNewPointButtonTemplate();
   }
 
-  setDisabled = (isDisabled) => {
-    this.element.disabled = isDisabled;
-  };
-
   #clickHandler = (evt) => {
     evt.preventDefault();
     this.#handleClick();
+  };
+
+  setDisabled = (isDisabled) => {
+    this.element.disabled = isDisabled;
   };
 }
