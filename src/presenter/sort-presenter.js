@@ -1,11 +1,12 @@
-import { render } from '../framework/render';
+import { render, remove } from '../framework/render';
 import { SORT_TYPE, ENABLED_SORT_TYPE } from '../const';
 import NewSortView from '../view/sort-view.js';
 
 export default class SortPresenter {
-  constructor({ container, handleSortTypeChange }) {
+  constructor({ container, onSortTypeChange, currentSortType }) {
     this.#container = container;
-    this.#handleSortTypeChange = handleSortTypeChange;
+    this.#handleSortTypeChange = onSortTypeChange;
+    this.#currentSortType = currentSortType;
   }
 
   #container = null;
@@ -40,4 +41,8 @@ export default class SortPresenter {
     this.#currentSortType = sortType;
     this.#handleSortTypeChange(sortType);
   };
+
+  destroy() { //
+    remove(this.#sortComponent);
+  }
 }

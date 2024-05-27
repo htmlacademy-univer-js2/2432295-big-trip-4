@@ -1,5 +1,6 @@
 import { render, replace, remove } from '../framework/render';
-import { MODE } from '../const';
+import { MODE, UPDATE_TYPE, USER_ACTION, EDIT_TYPE } from '../const'; // caps
+import { isMajorDiff } from '../utils';
 
 import NewRoutePointView from '../view/route-point-view.js';
 import NewEditFormView from '../view/edit-form-view.js';
@@ -49,7 +50,10 @@ export default class RoutePointPresenter {
       destinations: this.#destinationsModel.destinations,
 
       onEditFormResetClick: this.#onEditFormReset,
-      onEditFormSubmitClick: this.#onEditFormSubmit
+      onEditFormSubmitClick: this.#onEditFormSubmit,
+      onEditFormDeleteClick: this.#onEditFormDelete, //
+
+      editFormType: EDIT_TYPE.EDITING, //
     });
 
     if (prevPointComponent === null || prevEditFormComponent === null) {
@@ -72,16 +76,30 @@ export default class RoutePointPresenter {
     remove(prevEditFormComponent);
   }
 
-  #onFavoriteClick = () => {
-    this.#handleDataChange({ ...this.#routePoint, isFavorite: !this.#routePoint.isFavorite });
-  };
 
   #onEditFormClick = () => {
     this.#replacePointToForm();
   };
 
+  #onFavoriteClick = () => {
+    this.#handleDataChange(
+      USER_ACTION.UPDATE_POINT, //
+      UPDATE_TYPE.MINOR, //
+      {
+        ...this.#routePoint,
+        isFavorite: !this.#routePoint.isFavorite,
+      });
+  };
+
   #onEditFormSubmit = (updatePoint) => {
-    this.#routePoint = updatePoint;
+    //this.#routePoint = updatePoint;
+
+    this.#handleDataChange(
+      USER_ACTION.UPDATE_POINT,
+      isMajorDiff(updatePoint, this.#routePoint) ? UPDATE_TYPE.MINOR : UPDATE_TYPE.PATCH,
+      updatePoint
+    );
+
     this.#replaceEditToPoint();
     document.removeEventListener('keydown', this.#escKeyHandler);
   };
@@ -91,6 +109,14 @@ export default class RoutePointPresenter {
 
     this.#replaceEditToPoint();
     document.removeEventListener('keydown', this.#escKeyHandler);
+  };
+
+  #onEditFormDelete = (routePoint) => { // handleDeleteClick
+    this.#handleDataChange(
+      USER_ACTION.DELETE_POINT,
+      UPDATE_TYPE.MINOR,
+      routePoint
+    );
   };
 
 

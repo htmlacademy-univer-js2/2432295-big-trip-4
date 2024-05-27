@@ -2,11 +2,11 @@ import AbstractView from '../framework/view/abstract-view';
 import { createFiltersTemplate } from '../template/filters-template';
 
 export default class NewFiltersView extends AbstractView{
-  constructor(filters) { // constructor(filters, onFilterChange)
+  constructor({ filters, onFilterTypeChange, currentFilterType }) { // constructor(filters, onFilterChange)
     super();
 
     this.#filters = filters;
-    //this.#handleFilterChange = onFilterChange;
+    //this.#handleFilterTypeChange = onFilterChange;
 
     //this.element.addEventListener('change', this.#filterChangeHandler);
 
@@ -14,17 +14,27 @@ export default class NewFiltersView extends AbstractView{
       const filterType = `#filter-${filter.type}`;
       this.element.querySelector(filterType).addEventListener('change', this.#filterClickHandler);
     }*/
+
+    this.#handleFilterTypeChange = onFilterTypeChange; //
+    this.#currentFilterType = currentFilterType; //
+
+    this.element.addEventListener('change', this.#filterTypeChangeHandler); //
   }
 
   #filters;
-  //#handleFilterChange = null;
+  #currentFilterType; //
+  #handleFilterTypeChange = null; //
 
+  #filterTypeChangeHandler = (evt) => { //
+    evt.preventDefault();
+    this.#handleFilterTypeChange(evt.target.value);
+  };
 
   get filters() {
     return this.#filters;
   }
 
   get template() {
-    return createFiltersTemplate(this.#filters);
+    return createFiltersTemplate(this.#filters, this.#currentFilterType); //
   }
 }

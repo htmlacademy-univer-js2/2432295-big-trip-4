@@ -1,6 +1,6 @@
-import { isFutureDate, isPastDate, isPresentDate,
-  getRoutePointsDayDiff, getRoutePointsEventDiff, getRoutePointsPriceDiff, getRoutePointsDurationDiff, getRoutePointsOfferDiff
-} from './utils';
+import dayjs from 'dayjs';
+import { getRoutePointsDayDiff, getRoutePointsEventDiff, getRoutePointsPriceDiff,
+  getRoutePointsDurationDiff, getRoutePointsOfferDiff } from './utils';
 
 const DESCRIPTION = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetra. Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante. ';
 
@@ -78,16 +78,27 @@ const DATE_PERIODS = {
 };
 
 const DEFAULT_TYPE = 'flight';
+const DEFAULT_DESTINATION_ID = null; //
 
-const POINT_EMPTY = {
-  basePrice: 0,
-  dateFrom: null,
-  dateTo: null,
-  destination: null,
-  isFavorite: false,
-  offers: [],
-  type: DEFAULT_TYPE
+const DEFAULT_DESTINATION = { //
+  id: DEFAULT_DESTINATION_ID,
+  description: '',
+  name: '',
+  pictures: [],
 };
+
+function POINT_EMPTY() { //
+  return {
+    id: crypto.randomUUID(),
+    basePrice: 0,
+    dateFrom: dayjs().toDate(),
+    dateTo:  dayjs().toDate(),
+    destination: DEFAULT_DESTINATION_ID,
+    isFavorite: false,
+    offers: [],
+    type: DEFAULT_TYPE
+  };
+}
 
 
 const FILTER_TYPE = {
@@ -95,13 +106,6 @@ const FILTER_TYPE = {
   FUTURE: 'future',
   PRESENT: 'present',
   PAST: 'past',
-};
-
-const FILTER_OPTIONS = {
-  [FILTER_TYPE.EVERYTHING]: (points) => points,
-  [FILTER_TYPE.FUTURE]: (points) => points.filter((point) => isFutureDate(point.dateFrom)),
-  [FILTER_TYPE.PRESENT]: (points) => points.filter((point) => isPresentDate(point.dateFrom, point.dateTo)),
-  [FILTER_TYPE.PAST]: (points) => points.filter((point) => isPastDate(point.dateTo)),
 };
 
 
@@ -123,7 +127,7 @@ const SORT_OPTIONS = {
 
 const ENABLED_SORT_TYPE = {
   [SORT_TYPE.DAY]: true,
-  [SORT_TYPE.EVENT]: true,
+  [SORT_TYPE.EVENT]: false,
   [SORT_TYPE.TIME]: true,
   [SORT_TYPE.PRICE]: true,
   [SORT_TYPE.OFFER]: false,
@@ -148,15 +152,34 @@ const MODE = {
   EDITING: 'editing',
 };
 
+const UPDATE_TYPE = { //
+  PATCH: 'PATCH',
+  MINOR: 'MINOR',
+  MAJOR: 'MAJOR'
+};
+
+const USER_ACTION = { //
+  UPDATE_POINT: 'UPDATE',
+  ADD_POINT: 'ADD',
+  DELETE_POINT: 'DELETE',
+};
+
+const EDIT_TYPE = { //
+  EDITING: 'EDITING',
+  CREATING: 'CREATING',
+};
+
 export {DATE_FORMAT, DATE_PERIODS,
   RANDOM_PRICE_MAX_LIMIT, RANDOM_PRICE_MIN_LIMIT,
   POINT_TYPES, CITIES, DESCRIPTION, OFFERS, PHOTO_ADDRESS,
   MAXIMUM_MINUTE_DIFFERENCE, MAXIMUM_HOUR_DIFFERENCE, MAXIMUM_DAY_DIFFERENCE,
   OFFERS_LIMIT, ROUTE_POINTS_COUNT,
   POINT_EMPTY,
-  FILTER_TYPE, FILTER_OPTIONS,
+  FILTER_TYPE,
   SORT_TYPE, SORT_OPTIONS, ENABLED_SORT_TYPE,
   container,
   WARNING_MESSAGE,
-  MODE
+  MODE,
+  UPDATE_TYPE, USER_ACTION, EDIT_TYPE,
+  DEFAULT_DESTINATION
 };
