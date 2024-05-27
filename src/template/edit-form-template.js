@@ -1,9 +1,9 @@
-import { POINT_TYPES } from '../const';
+import { POINT_TYPES, EDIT_TYPE, DEFAULT_DESTINATION } from '../const'; //
 import { getRandomNumber, humanizeDate } from '../utils';
 
-export function createEditFormTemplate(routePoint, destinations, offers) {
+export function createEditFormTemplate({routePoint, destinations, offers, editPointType}) {
   const { basePrice, dateFrom, dateTo, type } = routePoint;
-  const currentDestination = destinations.find((destination) => destination.id === routePoint.destination);
+  const currentDestination = routePoint.destination !== null ? destinations.find((destination) => destination.id === routePoint.destination) : DEFAULT_DESTINATION;
   const currentOffers = offers.find((offer) => offer.type === type).offers;
 
   return (
@@ -33,14 +33,15 @@ export function createEditFormTemplate(routePoint, destinations, offers) {
                       <span class="visually-hidden">Price</span>
                       &euro;
                     </label>
-                    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}">
+                    <input class="event__input  event__input--price" id="event-price-1" type="number" name="event-price" value="${basePrice}">
                   </div>
 
                   <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-                  <button class="event__reset-btn" type="reset">Delete</button>
-                  <button class="event__rollup-btn" type="button">
+
+                  <button class="event__reset-btn" type="reset">${editPointType === EDIT_TYPE.CREATING ? 'Cancel' : 'Delete'}</button>
+                  ${editPointType === EDIT_TYPE.EDITING ? `<button class="event__rollup-btn" type="button">
                     <span class="visually-hidden">Open event</span>
-                  </button>
+                  </button>` : ''}
                 </header>
                 <section class="event__details">
                     ${(currentOffers.length !== 0) ? createOffersList(currentOffers) : ''}
