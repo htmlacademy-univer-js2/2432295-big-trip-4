@@ -2,7 +2,7 @@ import AbstractView from '../framework/view/abstract-view';
 import { createFiltersTemplate } from '../template/filters-template';
 
 export default class NewFiltersView extends AbstractView{
-  constructor({ filters, onFilterTypeChange, currentFilterType }) { // constructor(filters, onFilterChange)
+  constructor({ filters, onFilterTypeChange, currentFilterType }) {
     super();
 
     this.#filters = filters;
