@@ -10,7 +10,7 @@ export default class NewFiltersView extends AbstractView{
 
     //this.element.addEventListener('change', this.#filterChangeHandler);
 
-    /*for (const filter of this.#filters){
+    /*for (const filter of this.#filters) {
       const filterType = `#filter-${filter.type}`;
       this.element.querySelector(filterType).addEventListener('change', this.#filterClickHandler);
     }*/
