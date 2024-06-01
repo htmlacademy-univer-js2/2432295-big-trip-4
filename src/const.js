@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { getRoutePointsDayDiff, getRoutePointsEventDiff, getRoutePointsPriceDiff,
-  getRoutePointsDurationDiff, getRoutePointsOfferDiff } from './utils';
+  getRoutePointsDurationDiff, getRoutePointsOfferDiff, isFutureDate, isPastDate, isPresentDate } from './utils';
 
 const DESCRIPTION = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras aliquet varius magna, non porta ligula feugiat eget. Fusce tristique felis at fermentum pharetra. Aliquam id orci ut lectus varius viverra. Nullam nunc ex, convallis sed finibus eget, sollicitudin eget ante. ';
 
@@ -77,28 +77,27 @@ const DATE_PERIODS = {
   MSEC_IN_DAY: 24 * 60 * 60 * 1000
 };
 
-const DEFAULT_TYPE = 'flight';
-const DEFAULT_DESTINATION_ID = null; //
 
-const DEFAULT_DESTINATION = { //
+const DEFAULT_TYPE = 'flight';
+const DEFAULT_DESTINATION_ID = null;
+
+const DEFAULT_DESTINATION = {
   id: DEFAULT_DESTINATION_ID,
   description: '',
   name: '',
   pictures: [],
 };
 
-function POINT_EMPTY() { //
-  return {
-    id: crypto.randomUUID(),
-    basePrice: 0,
-    dateFrom: dayjs().toDate(),
-    dateTo:  dayjs().toDate(),
-    destination: DEFAULT_DESTINATION_ID,
-    isFavorite: false,
-    offers: [],
-    type: DEFAULT_TYPE
-  };
-}
+const POINT_EMPTY = {
+  id: crypto.randomUUID(),
+  basePrice: 0,
+  dateFrom: dayjs().toDate(),
+  dateTo:  dayjs().toDate(),
+  destination: DEFAULT_DESTINATION_ID,
+  isFavorite: false,
+  offers: [],
+  type: DEFAULT_TYPE
+};
 
 
 const FILTER_TYPE = {
@@ -106,6 +105,13 @@ const FILTER_TYPE = {
   FUTURE: 'future',
   PRESENT: 'present',
   PAST: 'past',
+};
+
+const FILTER_OPTIONS = {
+  [FILTER_TYPE.EVERYTHING]: (points) => points,
+  [FILTER_TYPE.FUTURE]: (points) => points.filter((point) => isFutureDate(point.dateFrom)),
+  [FILTER_TYPE.PRESENT]: (points) => points.filter((point) => isPresentDate(point.dateFrom, point.dateTo)),
+  [FILTER_TYPE.PAST]: (points) => points.filter((point) => isPastDate(point.dateTo)),
 };
 
 
@@ -117,20 +123,20 @@ const SORT_TYPE = {
   OFFER: 'offer'
 };
 
-const SORT_OPTIONS = {
-  [SORT_TYPE.DAY]: (routePoints) => routePoints.sort(getRoutePointsDayDiff),
-  [SORT_TYPE.EVENT]: (routePoints) => routePoints.sort(getRoutePointsEventDiff),
-  [SORT_TYPE.PRICE]: (routePoints) => routePoints.sort(getRoutePointsPriceDiff),
-  [SORT_TYPE.TIME]: (routePoints) => routePoints.sort(getRoutePointsDurationDiff),
-  [SORT_TYPE.OFFER]: (routePoints) => routePoints.sort(getRoutePointsOfferDiff),
-};
-
 const ENABLED_SORT_TYPE = {
   [SORT_TYPE.DAY]: true,
   [SORT_TYPE.EVENT]: false,
   [SORT_TYPE.TIME]: true,
   [SORT_TYPE.PRICE]: true,
   [SORT_TYPE.OFFER]: false,
+};
+
+const SORT_OPTIONS = {
+  [SORT_TYPE.DAY]: (routePoints) => routePoints.sort(getRoutePointsDayDiff),
+  [SORT_TYPE.EVENT]: (routePoints) => routePoints.sort(getRoutePointsEventDiff),
+  [SORT_TYPE.PRICE]: (routePoints) => routePoints.sort(getRoutePointsPriceDiff),
+  [SORT_TYPE.TIME]: (routePoints) => routePoints.sort(getRoutePointsDurationDiff),
+  [SORT_TYPE.OFFER]: (routePoints) => routePoints.sort(getRoutePointsOfferDiff),
 };
 
 
@@ -141,33 +147,35 @@ const WARNING_MESSAGE = {
   [FILTER_TYPE.PAST]: 'There are no past events'
 };
 
-const container = {
-  filter: document.querySelector('.trip-controls__filters'),
-  tripInfo: document.querySelector('.trip-main'),
-  events: document.querySelector('.trip-events')
+const CONTAINER = {
+  FILTER: document.querySelector('.trip-controls__filters'),
+  TRIP_INFO: document.querySelector('.trip-main'),
+  EVENTS: document.querySelector('.trip-events')
 };
+
 
 const MODE = {
   DEFAULT: 'default',
   EDITING: 'editing',
 };
 
-const UPDATE_TYPE = { //
+const UPDATE_TYPE = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
   MAJOR: 'MAJOR'
 };
 
-const USER_ACTION = { //
+const USER_ACTION = {
   UPDATE_POINT: 'UPDATE',
   ADD_POINT: 'ADD',
   DELETE_POINT: 'DELETE',
 };
 
-const EDIT_TYPE = { //
+const EDIT_TYPE = {
   EDITING: 'EDITING',
   CREATING: 'CREATING',
 };
+
 
 export {DATE_FORMAT, DATE_PERIODS,
   RANDOM_PRICE_MAX_LIMIT, RANDOM_PRICE_MIN_LIMIT,
@@ -175,9 +183,9 @@ export {DATE_FORMAT, DATE_PERIODS,
   MAXIMUM_MINUTE_DIFFERENCE, MAXIMUM_HOUR_DIFFERENCE, MAXIMUM_DAY_DIFFERENCE,
   OFFERS_LIMIT, ROUTE_POINTS_COUNT,
   POINT_EMPTY,
-  FILTER_TYPE,
+  FILTER_TYPE, FILTER_OPTIONS,
   SORT_TYPE, SORT_OPTIONS, ENABLED_SORT_TYPE,
-  container,
+  CONTAINER,
   WARNING_MESSAGE,
   MODE,
   UPDATE_TYPE, USER_ACTION, EDIT_TYPE,

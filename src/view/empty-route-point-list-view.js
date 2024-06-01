@@ -2,7 +2,7 @@ import AbstractView from '../framework/view/abstract-view.js';
 import { createEmptyPointListTemplate } from '../template/empty-route-point-list-template.js';
 
 
-export default class NewEmptyRoutePointsView extends AbstractView{ // all
+export default class NewEmptyRoutePointsView extends AbstractView{
   constructor(currentFilterType) {
     super();
 

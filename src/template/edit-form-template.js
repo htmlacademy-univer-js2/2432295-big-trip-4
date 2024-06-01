@@ -1,4 +1,4 @@
-import { POINT_TYPES, EDIT_TYPE, DEFAULT_DESTINATION } from '../const'; //
+import { POINT_TYPES, EDIT_TYPE, DEFAULT_DESTINATION } from '../const';
 import { getRandomNumber, humanizeDate } from '../utils';
 
 export function createEditFormTemplate({routePoint, destinations, offers, editPointType}) {

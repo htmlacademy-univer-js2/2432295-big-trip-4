@@ -1,25 +1,29 @@
 import AbstractView from '../framework/view/abstract-view';
 import { createNewPointButtonTemplate } from '../template/create-point-button-template';
 
-export default class CreatePointButtonView extends AbstractView { //all
-  #handleClick = null;
-
-  constructor({ onClick }) {
+export default class CreateRoutePointButtonView extends AbstractView {
+  constructor({ onNewPointButtonClick }) {
     super();
-    this.#handleClick = onClick;
-    this.element.addEventListener('click', this.#clickHandler);
+    this.#handleNewPointButtonClick = onNewPointButtonClick;
+    this.element.addEventListener('click', this.#newPointButtonClickHandler);
   }
+
+  #handleNewPointButtonClick = null;
+
+  setDisable() {
+    this.element.disabled = true;
+  }
+
+  setEnable() {
+    this.element.disabled = false;
+  }
+
+  #newPointButtonClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleNewPointButtonClick();
+  };
 
   get template() {
     return createNewPointButtonTemplate();
   }
-
-  #clickHandler = (evt) => {
-    evt.preventDefault();
-    this.#handleClick();
-  };
-
-  setDisabled = (isDisabled) => {
-    this.element.disabled = isDisabled;
-  };
 }

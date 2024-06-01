@@ -6,16 +6,16 @@ import NewRoutePointView from '../view/route-point-view.js';
 import NewEditFormView from '../view/edit-form-view.js';
 
 export default class RoutePointPresenter {
-  constructor({ routePointListcontainer, offersModel, destinationsModel, onDataChange, onModeChange }) {
+  constructor({ container, offersModel, destinationsModel, onDataChange, onModeChange }) {
 
-    this.#routePointListcontainer = routePointListcontainer;
+    this.#container = container;
     this.#offersModel = offersModel;
     this.#destinationsModel = destinationsModel;
     this.#handleDataChange = onDataChange;
     this.#handleModeChange = onModeChange;
   }
 
-  #routePointListcontainer = null;
+  #container = null;
   #routePoint = null;
 
   #currentMode = MODE.DEFAULT;
@@ -53,11 +53,11 @@ export default class RoutePointPresenter {
       onEditFormSubmitClick: this.#onEditFormSubmit,
       onEditFormDeleteClick: this.#onEditFormDelete, //
 
-      editFormType: EDIT_TYPE.EDITING, //
+      editPointType: EDIT_TYPE.EDITING, //
     });
 
     if (prevPointComponent === null || prevEditFormComponent === null) {
-      render(this.#routePointComponent, this.#routePointListcontainer);
+      render(this.#routePointComponent, this.#container);
       return;
     }
 

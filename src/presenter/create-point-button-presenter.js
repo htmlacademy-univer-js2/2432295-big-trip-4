@@ -1,24 +1,24 @@
 import { render } from '../framework/render';
-import CreatePointButtonView from '../view/create-point-button-view';
+import CreateRoutePointButtonView from '../view/create-point-button-view';
 
-export default class CreatePointButtonPresenter { //all
+export default class CreateRoutePointButtonPresenter {
   #container = null;
-  #button = null;
+  #createRoutePointButton = null;
 
   constructor({ container }) {
     this.#container = container;
   }
 
-  init = ({ onClick }) => {
-    this.#button = new CreatePointButtonView({ onClick });
-    render(this.#button, this.#container);
+  init = ({ onNewPointButtonClick }) => {
+    this.#createRoutePointButton = new CreateRoutePointButtonView({ onNewPointButtonClick });
+    render(this.#createRoutePointButton, this.#container);
   };
 
   disableButton() {
-    this.#button.setDisabled(true);
+    this.#createRoutePointButton.setDisable();
   }
 
   enableButton() {
-    this.#button.setDisabled(false);
+    this.#createRoutePointButton.setEnable();
   }
 }

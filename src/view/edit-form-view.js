@@ -1,15 +1,15 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import { createEditFormTemplate } from '../template/edit-form-template';
-import { POINT_EMPTY, EDIT_TYPE } from '../const'; //
+import { POINT_EMPTY, EDIT_TYPE } from '../const';
 
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
 
 export default class NewEditFormView extends AbstractStatefulView {
-  constructor({ routePoint = POINT_EMPTY(), destinations, offers,
+  constructor({ routePoint = POINT_EMPTY, destinations, offers,
     onEditFormSubmitClick, onEditFormResetClick, onEditFormDeleteClick,
-    editFormType = EDIT_TYPE.EDITING }) {
+    editPointType = EDIT_TYPE.EDITING }) {
     super();
     this.#destinations = destinations;
     this.#offers = offers;
@@ -18,7 +18,7 @@ export default class NewEditFormView extends AbstractStatefulView {
     this.#handleEditFormResetClick = onEditFormResetClick;
     this.#handleEditFormDeleteClick = onEditFormDeleteClick;
 
-    this.#editFormType = editFormType;
+    this.#editPointType = editPointType;
 
     this._setState({ routePoint });
     this._restoreHandlers();
@@ -29,9 +29,9 @@ export default class NewEditFormView extends AbstractStatefulView {
 
   #handleEditFormSubmitClick = null;
   #handleEditFormResetClick = null;
-  #handleEditFormDeleteClick = null; //
+  #handleEditFormDeleteClick = null;
 
-  #editFormType = null;
+  #editPointType = null;
 
   #datepickerFrom = null;
   #datepickerTo = null;
@@ -42,104 +42,45 @@ export default class NewEditFormView extends AbstractStatefulView {
 
 
   _restoreHandlers = () => {
-    if (this.#editFormType === EDIT_TYPE.EDITING) { //
-      this.element
-        .querySelector('.event__rollup-btn')
-        .addEventListener('click', this.#resetClickHandler);
-
-      this.element
-        .querySelector('.event__reset-btn')
-        .addEventListener('click', this.#deleteClickHandler);
-    }
-
-    if (this.#editFormType === EDIT_TYPE.CREATING) { //
-      this.element
-        .querySelector('.event__reset-btn')
-        .addEventListener('click', this.#resetClickHandler);
-    }
-
     this.element
       .querySelector('form')
-      .addEventListener('submit', this.#submitClickHandler);
+      .addEventListener('submit', this.#handleSubmitClick);
 
     this.element
       .querySelector('.event__input--price')
-      .addEventListener('change', this.#priceChangeHandler);
+      .addEventListener('change', this.#handlePriceChange);
 
     this.element
       .querySelector('.event__type-group')
-      .addEventListener('change', this.#typeChangeHandler);
+      .addEventListener('change', this.#handleTypeChange);
 
     this.element
       .querySelector('.event__input--destination')
-      .addEventListener('change', this.#destinationChangeHandler);
+      .addEventListener('change', this.#handleDestinationChange);
 
     this.element
       .querySelector('.event__available-offers')
-      ?.addEventListener('change', this.#offerChangeHandler);
+      ?.addEventListener('change', this.#handleOfferChange);
+
+
+    if (this.#editPointType === EDIT_TYPE.CREATING) {
+      this.element
+        .querySelector('.event__reset-btn')
+        .addEventListener('click', this.#handleResetClick);
+    }
+
+    if (this.#editPointType === EDIT_TYPE.EDITING) {
+      this.element
+        .querySelector('.event__rollup-btn')
+        .addEventListener('click', this.#handleResetClick);
+
+      this.element
+        .querySelector('.event__reset-btn')
+        .addEventListener('click', this.#handleDeleteClick);
+    }
+
 
     this.#setDatepickers();
-  };
-
-
-  #resetClickHandler = (evt) => {
-    evt.preventDefault();
-    this.#handleEditFormResetClick();
-  };
-
-  #submitClickHandler = (evt) => {
-    evt.preventDefault();
-    this.#handleEditFormSubmitClick(NewEditFormView.parseStateToPoint(this._state));
-  };
-
-  #deleteClickHandler = (evt) => { //
-    evt.preventDefault();
-    this.#handleEditFormDeleteClick(NewEditFormView.parseStateToPoint(this._state));
-  };
-
-  #priceChangeHandler = (evt) => {
-    this._setState({
-      routePoint: {
-        ...this._state.routePoint,
-        basePrice: evt.target.valueAsNumber,
-      }
-    });
-  };
-
-  #typeChangeHandler = (evt) => {
-    evt.preventDefault();
-    this.updateElement({
-      routePoint: {
-        ...this._state.routePoint,
-        type: evt.target.value,
-        offers: []
-      },
-    });
-  };
-
-  #destinationChangeHandler = (evt) => { //
-    let currentDestination = this.#destinations.find((destination) => destination.name === evt.target.value);
-    currentDestination = currentDestination === undefined ? undefined : currentDestination.id;
-
-    this.updateElement({
-      routePoint: {
-        ...this._state.routePoint,
-        destination: currentDestination,
-      }
-    });
-  };
-
-  #offerChangeHandler = () => {
-    const offersId = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'))
-      .map((checkbox) => checkbox.dataset.offerId);
-
-
-    this._setState({
-      routePoint: {
-        ...this._state.routePoint,
-        offers: offersId
-      }
-    });
   };
 
 
@@ -161,7 +102,7 @@ export default class NewEditFormView extends AbstractStatefulView {
           ...config,
           defaultDate: this._state.dateFrom,
           maxDate: this._state.dateTo,
-          onClose: this.#routePointDateFromCloseHandler,
+          onClose: this.#handleRoutePointDateFromClose,
         },
       );
     }
@@ -173,16 +114,75 @@ export default class NewEditFormView extends AbstractStatefulView {
           ...config,
           defaultDate: this._state.dateTo,
           minDate: this._state.dateFrom,
-          onClose: this.#routePointDateToCloseHandler,
+          onClose: this.#handleRoutePointDateToClose,
         },
       );
     }
   };
 
 
-  #routePointDateFromCloseHandler = ([userDate]) => {
+  #handleResetClick = (evt) => {
+    evt.preventDefault();
+    this.#handleEditFormResetClick();
+  };
+
+  #handleSubmitClick = (evt) => {
+    evt.preventDefault();
+    this.#handleEditFormSubmitClick(NewEditFormView.parseStateToPoint(this._state));
+  };
+
+  #handleDeleteClick = (evt) => {
+    evt.preventDefault();
+    this.#handleEditFormDeleteClick(NewEditFormView.parseStateToPoint(this._state));
+  };
+
+  #handlePriceChange = (evt) => {
     this._setState({
-      routePoint:{
+      routePoint: {
+        ...this._state.routePoint,
+        basePrice: evt.target.valueAsNumber,
+      }
+    });
+  };
+
+  #handleTypeChange = (evt) => {
+    evt.preventDefault();
+    this.updateElement({
+      routePoint: {
+        ...this._state.routePoint,
+        type: evt.target.value,
+        offers: []
+      },
+    });
+  };
+
+  #handleDestinationChange = (evt) => {
+    let currentDestination = this.#destinations.find((destination) => destination.name === evt.target.value);
+    currentDestination = currentDestination === undefined ? undefined : currentDestination.id;
+
+    this.updateElement({
+      routePoint: {
+        ...this._state.routePoint,
+        destination: currentDestination,
+      }
+    });
+  };
+
+  #handleOfferChange = () => {
+    const offersId = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'))
+      .map((checkbox) => checkbox.dataset.offerId);
+
+    this._setState({
+      routePoint: {
+        ...this._state.routePoint,
+        offers: offersId
+      }
+    });
+  };
+
+  #handleRoutePointDateFromClose = ([userDate]) => {
+    this._setState({
+      routePoint: {
         ...this._state.routePoint,
         dateFrom: userDate
       }
@@ -190,9 +190,9 @@ export default class NewEditFormView extends AbstractStatefulView {
     this.#datepickerTo.set('minDate', this._state.routePoint.dateFrom);
   };
 
-  #routePointDateToCloseHandler = ([userDate]) => {
+  #handleRoutePointDateToClose = ([userDate]) => {
     this._setState({
-      routePoint:{
+      routePoint: {
         ...this._state.routePoint,
         dateFrom: userDate
       }
@@ -214,7 +214,6 @@ export default class NewEditFormView extends AbstractStatefulView {
     }
   };
 
-
   reset(routePoint) {
     this.updateElement({
       routePoint
@@ -222,11 +221,11 @@ export default class NewEditFormView extends AbstractStatefulView {
   }
 
   get template() {
-    return createEditFormTemplate({ //
+    return createEditFormTemplate({
       routePoint: this._state.routePoint,
       offers: this.#offers,
       destinations: this.#destinations,
-      editPointType: this.#editFormType,
+      editPointType: this.#editPointType,
     });
   }
 }

@@ -2,50 +2,45 @@ import { RenderPosition, render, remove } from '../framework/render';
 import { USER_ACTION, UPDATE_TYPE, EDIT_TYPE } from '../const';
 import NewEditFormView from '../view/edit-form-view';
 
-export default class CreatePointPresenter { //all
+export default class CreateRoutePointPresenter {
   #container = null;
-  #createPointComponent = null;
+  #createRoutePointComponent = null;
 
-  #destinationModel = null;
+  #destinationsModel = null;
   #offersModel = null;
 
   #handleDataChange = null;
   #handleDestroy = null;
 
-  constructor ({container, destinationModel, offersModel, onDataChange, onDestroy}) {
+  constructor ({container, destinationsModel, offersModel, onDataChange, onDestroy}) {
     this.#container = container;
-    this.#destinationModel = destinationModel;
+
+    this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
+
     this.#handleDataChange = onDataChange;
     this.#handleDestroy = onDestroy;
   }
 
-  init = () => { //
-    if (!this.#createPointComponent) {
-      this.#createPointComponent = new NewEditFormView({
+  init = () => {
+    if (!this.#createRoutePointComponent) {
+      this.#createRoutePointComponent = new NewEditFormView({
         offers: this.#offersModel.offers,
-        destinations: this.#destinationModel.destinations,
+        destinations: this.#destinationsModel.destinations,
         onEditFormResetClick: this.#handleFormClose,
         onEditFormSubmitClick : this.#handleEditFormSubmit,
-        editFormType: EDIT_TYPE.CREATING,
+        editPointType: EDIT_TYPE.CREATING,
       });
     }
 
-    render(this.#createPointComponent, this.#container, RenderPosition.AFTERBEGIN);
-    document.addEventListener('keydown', this.#escKeyDownHandler);
+    render(this.#createRoutePointComponent, this.#container, RenderPosition.AFTERBEGIN);
+    document.addEventListener('keydown', this.#handleEscKeyDown);
 
   };
 
-  destroy = ({isCanceled = true} = {}) => {
-    if (!this.#createPointComponent) {
-      return;
-    }
 
-    remove(this.#createPointComponent);
-    this.#createPointComponent = null;
-    document.removeEventListener('keydown', this.#escKeyDownHandler);
-
-    this.#handleDestroy({isCanceled});
+  #handleFormClose = () => {
+    this.destroy();
   };
 
   #handleEditFormSubmit = (routePoint) => {
@@ -60,14 +55,23 @@ export default class CreatePointPresenter { //all
     }
   };
 
-  #handleFormClose = () => {
-    this.destroy();
-  };
-
-  #escKeyDownHandler = (evt) => {
+  #handleEscKeyDown = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
       this.destroy();
     }
+  };
+
+
+  destroy = ({isCanceled = true} = {}) => {
+    if (!this.#createRoutePointComponent) {
+      return;
+    }
+
+    remove(this.#createRoutePointComponent);
+    this.#createRoutePointComponent = null;
+    document.removeEventListener('keydown', this.#handleEscKeyDown);
+
+    this.#handleDestroy({isCanceled});
   };
 }

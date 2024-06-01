@@ -54,16 +54,13 @@ function getNewRandomValidDate(previousDate = 0) {
   return date;
 }
 
-function isFutureDate(dateFrom) {
-  return dayjs(dateFrom).isAfter(dayjs());
-}
-function isPastDate(dateTo) {
-  return dayjs(dateTo).isBefore(dayjs());
-}
-function isPresentDate(dateFrom, dateTo) {
+
+const isFutureDate = (dateFrom) => dayjs(dateFrom).isAfter(dayjs());
+const isPastDate = (dateTo) => dayjs(dateTo).isBefore(dayjs());
+const isPresentDate = (dateFrom, dateTo) => {
   const now = dayjs();
   return now.isAfter(dayjs(dateFrom)) && now.isBefore(dayjs(dateTo));
-}
+};
 
 
 const getRoutePointsDayDiff = (firstPoint, secondPoint) => dayjs(firstPoint.dateFrom).diff(dayjs(secondPoint.dateFrom));
@@ -73,40 +70,23 @@ const getRoutePointsDurationDiff = (firstPoint, secondPoint) => dayjs(secondPoin
 - dayjs(firstPoint.dateTo).diff(dayjs(firstPoint.dateFrom));
 const getRoutePointsOfferDiff = (firstPoint, secondPoint) => firstPoint.offers.length - secondPoint.offers.length;
 
-const sortPoints = (points, sortType = SORT_TYPE.DAY) => SORT_OPTIONS[sortType](points);
+
+const sortRoutePoints = (routePoints, sortType = SORT_TYPE.DAY) => SORT_OPTIONS[sortType](routePoints);
 
 
-const FILTER_TYPE = { //
-  EVERYTHING: 'everything',
-  FUTURE: 'future',
-  PRESENT: 'present',
-  PAST: 'past',
+const isMajorDiff = (firstPoint, secondPoint) => {
+  const firstPointDuration = dayjs(firstPoint.dateTo).diff(dayjs(firstPoint.dateFrom));
+  const secondPointDuration = dayjs(secondPoint.dateTo).diff(dayjs(secondPoint.dateFrom));
+
+  return firstPoint.dateFrom !== secondPoint.dateFrom
+  || firstPoint.basePrice !== secondPoint.basePrice
+  || firstPointDuration !== secondPointDuration;
 };
-
-const FILTER_OPTIONS = { // та же что была в const, rn FILTER_OPTIONS
-  [FILTER_TYPE.EVERYTHING]: (points) => points,
-  [FILTER_TYPE.FUTURE]: (points) => points.filter((point) => isFutureDate(point.dateFrom)),
-  [FILTER_TYPE.PRESENT]: (points) => points.filter((point) => isPresentDate(point.dateFrom, point.dateTo)),
-  [FILTER_TYPE.PAST]: (points) => points.filter((point) => isPastDate(point.dateTo)),
-};
-
-const isMajorDiff = (firstPoint, secondPoint) => { //
-  const aPointDuration = dayjs(firstPoint.dateTo).diff(dayjs(firstPoint.dateFrom));
-  const bPointDuration = dayjs(secondPoint.dateTo).diff(dayjs(secondPoint.dateFrom));
-
-  return firstPoint.dateFrom !== secondPoint.dateFrom || firstPoint.basePrice !== secondPoint.basePrice || aPointDuration !== bPointDuration;
-};
-
-
-function updatePoint(points, updatedPoint) {
-  return points.map((point) => point.id === updatedPoint.id ? updatedPoint : point);
-}
 
 
 export { getRandomNumber, getRandomArrayElement, humanizeDate, getDateDuration, getNewRandomValidDate,
   isFutureDate, isPastDate, isPresentDate,
   getRoutePointsDayDiff, getRoutePointsEventDiff, getRoutePointsPriceDiff, getRoutePointsDurationDiff, getRoutePointsOfferDiff,
-  sortPoints,
-  FILTER_OPTIONS,
-  isMajorDiff,
-  updatePoint };
+  sortRoutePoints,
+  isMajorDiff
+};
