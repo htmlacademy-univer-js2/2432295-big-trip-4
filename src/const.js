@@ -154,11 +154,6 @@ const CONTAINER = {
 };
 
 
-const MODE = {
-  DEFAULT: 'default',
-  EDITING: 'editing',
-};
-
 const UPDATE_TYPE = {
   PATCH: 'PATCH',
   MINOR: 'MINOR',
@@ -172,9 +167,29 @@ const USER_ACTION = {
   DELETE_POINT: 'DELETE',
 };
 
-const EDIT_TYPE = {
+const EDIT_TYPE = { // rn MODE, editPointType rn editPointMode
+  DEFAULT: 'DEFAULT',
   EDITING: 'EDITING',
   CREATING: 'CREATING',
+};
+const MODE = { //
+  DEFAULT: 'DEFAULT',
+  EDITING: 'EDITING',
+  CREATING: 'CREATING',
+};
+
+
+const TIME_LIMIT = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000
+};
+
+const EDIT_POINT_VIEW_BUTTON_TEXT = { //
+  SAVE: 'Save',
+  DELETE: 'Delete',
+  CANCEL: 'Cancel',
+  LOAD_SAVE: 'Saving...',
+  LOAD_DELETE: 'Deleting...'
 };
 
 
@@ -190,5 +205,7 @@ export {DATE_FORMAT, DATE_PERIODS,
   WARNING_MESSAGE,
   MODE,
   UPDATE_TYPE, USER_ACTION, EDIT_TYPE,
-  DEFAULT_DESTINATION
+  DEFAULT_DESTINATION,
+  TIME_LIMIT,
+  EDIT_POINT_VIEW_BUTTON_TEXT
 };

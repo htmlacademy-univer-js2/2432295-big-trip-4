@@ -1,9 +1,7 @@
 import { RenderPosition, render, remove } from '../framework/render.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker';
 import { sortRoutePoints } from '../utils.js';
-import {
-  SORT_TYPE, FILTER_TYPE, FILTER_OPTIONS,
-  UPDATE_TYPE, USER_ACTION
-} from '../const.js';
+import { SORT_TYPE, FILTER_TYPE, FILTER_OPTIONS, UPDATE_TYPE, USER_ACTION, TIME_LIMIT } from '../const.js';
 
 import SortPresenter from './sort-presenter.js';
 import RoutePointPresenter from './route-point-presenter';
@@ -47,6 +45,14 @@ export default class Presenter {
   #currentSortType = SORT_TYPE.DAY;
   #isCreatingModeNow = false;
 
+  #isLoading = true;
+  #isLoadingError = false;
+
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TIME_LIMIT.LOWER_LIMIT,
+    upperLimit: TIME_LIMIT.UPPER_LIMIT
+  });
+
 
   get routePoints() {
     const filterType = this.#filterModel.getFilter();
@@ -63,6 +69,16 @@ export default class Presenter {
 
 
   #renderTrip() {
+    if (this.#isLoading) {
+      this.#renderEmptyList({isLoading: true});
+      return;
+    }
+
+    if (this.#isLoadingError) {
+      this.#renderEmptyList({isLoadingError: true});
+      return;
+    }
+
     if (!this.routePoints.length && !this.#isCreatingModeNow) {
       this.#renderEmptyList();
       return;
@@ -93,8 +109,12 @@ export default class Presenter {
     render(this.#routePointsComponent, this.#container.EVENTS);
   }
 
-  #renderEmptyList = () => {
-    this.#emptyPointListComponent = new NewEmptyRoutePointsView(this.#filterModel.getFilter());
+  #renderEmptyList = ({isLoading = false, isLoadingError = false} = {}) => {
+    this.#emptyPointListComponent = new NewEmptyRoutePointsView({
+      currentFilterType : this.#filterModel.getFilter(),
+      isLoading,
+      isLoadingError
+    });
     render(this.#emptyPointListComponent, this.#container.EVENTS);
   };
 
@@ -112,6 +132,11 @@ export default class Presenter {
       onModeChange: this.#handleModeChange
     });
 
+    if(this.#emptyPointListComponent){
+      remove(this.#emptyPointListComponent);
+      this.#renderRoutePointList();
+    }
+
     routePointPresenter.init(routePoint);
     this.#routePointPresenters.set(routePoint.id, routePointPresenter);
   };
@@ -128,6 +153,10 @@ export default class Presenter {
   };
 
   #handleModeChange = () => {
+    if (this.#createRoutePointPresenter !== null){
+      this.#createRoutePointPresenter.destroy();
+    }
+
     this.#routePointPresenters.forEach((routePointPresenter) => routePointPresenter.initialStateView());
   };
 
@@ -146,26 +175,49 @@ export default class Presenter {
         this.#renderTrip();
         break;
       case UPDATE_TYPE.INIT:
-        //this.#isLoading = false;
-        //this.#addPointButton.disabled = false;
+        if (data.isError) {
+          this.#isLoadingError = data.isError;
+        }
+        this.#isLoading = false;
         this.#clearTrip();
         this.#renderTrip();
         break;
     }
   };
 
-  #handleViewAction = (actionType, updateType, update) => {
-    switch (actionType) {
+  #handleViewAction = async (actionType, updateType, update) => {
+    this.#uiBlocker.block();
+
+    switch(actionType) {
       case USER_ACTION.UPDATE_POINT:
-        this.#pointsModel.updateRoutePoints(updateType, update);
+        this.#routePointPresenters.get(update.id).setSaving();
+        try {
+          await this.#pointsModel.updateRoutePoints(updateType, update);
+        } catch (err) {
+          this.#routePointPresenters.get(update.id).setAborting();
+        }
         break;
-      case USER_ACTION.DELETE_POINT:
-        this.#pointsModel.deleteRoutePoints(updateType, update);
-        break;
+
       case USER_ACTION.ADD_POINT:
-        this.#pointsModel.addRoutePoints(updateType, update);
+        this.#createRoutePointPresenter.setSaving();
+        try {
+          await this.#pointsModel.addRoutePoints(updateType, update);
+        } catch (err) {
+          this.#createRoutePointPresenter.setAborting();
+        }
+        break;
+
+      case USER_ACTION.DELETE_POINT:
+        this.#routePointPresenters.get(update.id).setDeleting();
+        try {
+          await this.#pointsModel.deleteRoutePoints(updateType, update);
+        } catch (err) {
+          this.#routePointPresenters.get(update.id).setAborting();
+        }
         break;
     }
+
+    this.#uiBlocker.unblock();
   };
 
 

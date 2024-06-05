@@ -20,7 +20,7 @@ export default class NewEditFormView extends AbstractStatefulView {
 
     this.#editPointType = editPointType;
 
-    this._setState({ routePoint });
+    this._setState(NewEditFormView.parsePointToState(routePoint));
     this._restoreHandlers();
   }
 
@@ -37,8 +37,21 @@ export default class NewEditFormView extends AbstractStatefulView {
   #datepickerTo = null;
 
 
-  static parsePointToState = ({ routePoint }) => ({ routePoint });
-  static parseStateToPoint = (state) => state.routePoint;
+  static parsePointToState(routePoint) {
+    return { ...routePoint,
+      isActive: true,
+      isSaving: false,
+      isDeleting: false
+    };
+  }
+
+  static parseStateToPoint(state) {
+    const routePoint = {...state};
+    delete routePoint.isActive;
+    delete routePoint.isSaving;
+    delete routePoint.isDeleting;
+    return routePoint;
+  }
 
 
   _restoreHandlers = () => {
@@ -95,7 +108,7 @@ export default class NewEditFormView extends AbstractStatefulView {
       'time_24hr': true
     };
 
-    if (this._state.routePoint.dateFrom) {
+    if (this._state.dateFrom) {
       this.#datepickerFrom = flatpickr(
         dateFromElement,
         {
@@ -107,7 +120,7 @@ export default class NewEditFormView extends AbstractStatefulView {
       );
     }
 
-    if (this._state.routePoint.dateTo) {
+    if (this._state.dateTo) {
       this.#datepickerTo = flatpickr(
         dateToElement,
         {
@@ -137,34 +150,30 @@ export default class NewEditFormView extends AbstractStatefulView {
   };
 
   #handlePriceChange = (evt) => {
+    evt.preventDefault();
     this._setState({
-      routePoint: {
-        ...this._state.routePoint,
-        basePrice: evt.target.valueAsNumber,
-      }
+      ...this._state.routePoint,
+      basePrice: evt.target.valueAsNumber
     });
   };
 
   #handleTypeChange = (evt) => {
     evt.preventDefault();
+
     this.updateElement({
-      routePoint: {
-        ...this._state.routePoint,
-        type: evt.target.value,
-        offers: []
-      },
+      type: evt.target.value,
+      offers: [],
     });
   };
 
   #handleDestinationChange = (evt) => {
-    let currentDestination = this.#destinations.find((destination) => destination.name === evt.target.value);
-    currentDestination = currentDestination === undefined ? undefined : currentDestination.id;
+    const currentDestination = this.#destinations.find((destination) => destination.name === evt.target.value);
+    const currentDestinationId = (currentDestination)
+      ? currentDestination.id
+      : null;
 
     this.updateElement({
-      routePoint: {
-        ...this._state.routePoint,
-        destination: currentDestination,
-      }
+      destination: currentDestinationId
     });
   };
 
@@ -173,31 +182,22 @@ export default class NewEditFormView extends AbstractStatefulView {
       .map(({id}) => id.split('-').slice(3).join('-'));
 
     this._setState({
-      routePoint: {
-        ...this._state.routePoint,
-        offers: selectedOffersId
-      }
+      offers: selectedOffersId
     });
   };
 
   #handleRoutePointDateFromClose = ([userDate]) => {
     this._setState({
-      routePoint: {
-        ...this._state.routePoint,
-        dateFrom: userDate
-      }
+      dateFrom: userDate
     });
-    this.#datepickerTo.set('minDate', this._state.routePoint.dateFrom);
+    this.#datepickerTo.set('minDate', this._state.dateFrom);
   };
 
   #handleRoutePointDateToClose = ([userDate]) => {
     this._setState({
-      routePoint: {
-        ...this._state.routePoint,
-        dateTo: userDate
-      }
+      dateTo: userDate
     });
-    this.#datepickerFrom.set('maxDate', this._state.routePoint.dateFrom);
+    this.#datepickerFrom.set('maxDate', this._state.dateFrom);
   };
 
 
@@ -222,7 +222,8 @@ export default class NewEditFormView extends AbstractStatefulView {
 
   get template() {
     return createEditFormTemplate( { //this._state, this.#offersByType, this.#destinations, this.#mode
-      routePoint: this._state.routePoint,
+      state: this._state,
+      routePoint: this._state,
       offersModel: this.#offersModel,
       destinations: this.#destinations,
       editPointType: this.#editPointType,

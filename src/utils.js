@@ -79,7 +79,7 @@ function updatePoints(points, update) { //
 }
 
 
-const isMajorDiff = (firstPoint, secondPoint) => {
+const isMinorUpdate = (firstPoint, secondPoint) => {
   const firstPointDuration = dayjs(firstPoint.dateTo).diff(dayjs(firstPoint.dateFrom));
   const secondPointDuration = dayjs(secondPoint.dateTo).diff(dayjs(secondPoint.dateFrom));
 
@@ -179,7 +179,7 @@ export { getRandomNumber, getRandomArrayElement, humanizeDate, getDateDuration, 
   getRoutePointsDayDiff, getRoutePointsEventDiff, getRoutePointsPriceDiff, getRoutePointsDurationDiff, getRoutePointsOfferDiff,
   sortRoutePoints,
   updatePoints,
-  isMajorDiff,
+  isMinorUpdate,
   adaptToServer, adaptToClient,
   getOffersCost, getTripCost,
   getTripInfoTitle, getTripInfoStartDate, getTripInfoEndDate
