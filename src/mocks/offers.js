@@ -1,4 +1,4 @@
-import { OFFERS, OFFERS_LIMIT, RANDOM_PRICE_MAX_LIMIT, RANDOM_PRICE_MIN_LIMIT, POINT_TYPES } from '../const';
+/*import { OFFERS, OFFERS_LIMIT, RANDOM_PRICE_MAX_LIMIT, RANDOM_PRICE_MIN_LIMIT, POINT_TYPES } from '../const';
 import { getRandomArrayElement, getRandomNumber } from '../utils';
 
 function generateRandomOffer() {
@@ -20,4 +20,4 @@ const getOffers = () => offersByType;
 
 const generateOffersByType = (type) => offersByType.find((offer) => offer.type === type).offers;
 
-export { getOffers, generateOffersByType };
+export { getOffers, generateOffersByType };*/

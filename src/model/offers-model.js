@@ -1,13 +1,20 @@
-import { getOffers } from '../mocks/offers';
+//import { getOffers } from '../mocks/offers';
 
 export default class OffersModel {
-  constructor() {
-    this.#offers = getOffers();
+  constructor(apiService) {
+    //this.#offers = getOffers();
+    this.#apiService = apiService;
   }
 
   #offers = null;
+  #apiService = null;
 
   get offers() {
+    return this.#offers;
+  }
+
+  async init() {
+    this.#offers = await this.#apiService.offers;
     return this.#offers;
   }
 

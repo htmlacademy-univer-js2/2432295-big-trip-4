@@ -1,10 +1,11 @@
 import { POINT_TYPES, EDIT_TYPE, DEFAULT_DESTINATION } from '../const';
-import { getRandomNumber, humanizeDate } from '../utils';
+import { humanizeDate } from '../utils';
 
-export function createEditFormTemplate({routePoint, destinations, offers, editPointType}) {
-  const { basePrice, dateFrom, dateTo, type } = routePoint;
+
+export function createEditFormTemplate({ routePoint, destinations, offersModel, editPointType }) {
+  const { basePrice, dateFrom, dateTo, type, offers } = routePoint;
   const currentDestination = routePoint.destination !== null ? destinations.find((destination) => destination.id === routePoint.destination) : DEFAULT_DESTINATION;
-  const currentOffers = offers.find((offer) => offer.type === type).offers;
+  const currentOffersByType = offersModel.getOffersByType(type);
 
   return (
     `<li class="trip-events__item">
@@ -44,8 +45,16 @@ export function createEditFormTemplate({routePoint, destinations, offers, editPo
                   </button>` : ''}
                 </header>
                 <section class="event__details">
-                    ${(currentOffers.length !== 0) ? createOffersList(currentOffers) : ''}
-                    ${(currentDestination) ? createDestinationTemplate(currentDestination) : ''}
+
+                  <section class="event__section  event__section--offers">
+                    <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+                    <div class="event__available-offers">
+                      ${currentOffersByType.length !== 0 ? createOffersList(offers, currentOffersByType) : ''}
+                    </div>
+                  </section>
+
+                  ${(currentDestination) ? createDestinationTemplate(currentDestination) : ''}
+
                 </section>
               </form>
             </li>`
@@ -78,8 +87,7 @@ function createEventTypesList(currentType) {
                       <fieldset class="event__type-group">
                         <legend class="visually-hidden">Event type</legend>
 
-                        ${POINT_TYPES.map((type) =>
-      `<div class="event__type-item">
+                        ${POINT_TYPES.map((type) => `<div class="event__type-item">
                           <input id="event-type-${type}-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}" ${(type === currentType) ? 'checked' : ''}>
                           <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-1">${type[0].toUpperCase() + type.slice(1)}</label>
                         </div>`).join('')}
@@ -94,28 +102,19 @@ function createDestinationList(destinations) {
             </datalist>`);
 }
 
-function createOffersList(currentOffers) {
-  const offersList = currentOffers.map((offer) =>
-    `<div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" data-offer-id="${offer.id}" id="${offer.id}" type="checkbox" name="event-offer-luggage" ${getCheckedOrNot()}>
-      <label class="event__offer-label" for="${offer.id}">
-        <span class="event__offer-title">${offer.title}</span>
-        &plus;&euro;&nbsp;
-        <span class="event__offer-price">${offer.price}</span>
-      </label>
-    </div>`).join('');
-
-  return (`<section class="event__section  event__section--offers">
-              <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-              <div class="event__available-offers">
-              ${offersList}
-              </div>
-           </section>`);
-}
-
-function getCheckedOrNot() {
-  const isChecked = Boolean(getRandomNumber(0, 1));
-  return isChecked ? 'checked' : '';
+function createOffersList(selectedOffers, currentOffers) {
+  return currentOffers.map((offer) => {
+    const slug = offer.title.split(' ').at(-1);
+    return `<div class="event__offer-selector">
+          <input class="event__offer-checkbox  visually-hidden" id="event-offer-${slug}-${offer.id}" type="checkbox" name="event-offer-${slug}"
+          ${selectedOffers.includes(offer.id) ? 'checked' : ''}>
+          <label class="event__offer-label" for="event-offer-${slug}-${offer.id}">
+            <span class="event__offer-title">${offer.title}</span>
+            &plus;&euro;&nbsp;
+            <span class="event__offer-price">${offer.price}</span>
+          </label>
+        </div>`;
+  }).join('');
 }
 
 function createPhotosList(photos) {

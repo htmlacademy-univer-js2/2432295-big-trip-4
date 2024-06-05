@@ -74,6 +74,11 @@ const getRoutePointsOfferDiff = (firstPoint, secondPoint) => firstPoint.offers.l
 const sortRoutePoints = (routePoints, sortType = SORT_TYPE.DAY) => SORT_OPTIONS[sortType](routePoints);
 
 
+function updatePoints(points, update) { //
+  return points.map((point) => point.id === update.id ? update : point);
+}
+
+
 const isMajorDiff = (firstPoint, secondPoint) => {
   const firstPointDuration = dayjs(firstPoint.dateTo).diff(dayjs(firstPoint.dateFrom));
   const secondPointDuration = dayjs(secondPoint.dateTo).diff(dayjs(secondPoint.dateFrom));
@@ -84,9 +89,98 @@ const isMajorDiff = (firstPoint, secondPoint) => {
 };
 
 
+function adaptToServer(point, isAddition = false) { // isAddition = false
+  const adaptedPoint = {
+    ...point,
+    ['base_price']: point.basePrice,
+    ['date_from']: point.dateFrom instanceof Date ? point.dateFrom.toISOString() : null,
+    ['date_to']: point.dateTo instanceof Date ? point.dateTo.toISOString() : null,
+    ['is_favorite']: point.isFavorite
+  };
+
+  delete adaptedPoint.basePrice;
+  delete adaptedPoint.dateFrom;
+  delete adaptedPoint.dateTo;
+  delete adaptedPoint.isFavorite;
+  if (isAddition) {
+    delete adaptedPoint.id;
+  }
+
+  return adaptedPoint;
+}
+
+function adaptToClient(point) {
+  const adaptedPoint = {
+    ...point,
+    basePrice: point['base_price'],
+    dateFrom: point['date_from'] !== null ? new Date(point['date_from']) : point['date_from'],
+    dateTo: point['date_to'] !== null ? new Date(point['date_to']) : point['date_to'],
+    isFavorite: point['is_favorite']
+  };
+
+  delete adaptedPoint['base_price'];
+  delete adaptedPoint['date_from'];
+  delete adaptedPoint['date_to'];
+  delete adaptedPoint['is_favorite'];
+  return adaptedPoint;
+}
+
+
+/*_________________________________________________________*/
+
+
+function getOffersCost(offerIds = [], offers = []) { //
+  return offerIds.reduce(
+    (result, id) => result + (offers.find((offer) => offer.id === id)?.basePrice ?? 0),
+    0
+  );
+}
+
+
+function getTripCost(points = [], offers = []) { //
+  return points.reduce(
+    (result, point) =>
+      result + point.basePrice + getOffersCost(point.offers, offers.find((offer) => point.type === offer.type)?.offers),
+    0);
+}
+
+function getTripInfoTitle(cities) { //
+  if (cities.length > 3) {
+    return `${cities[0]} &mdash; ... &mdash; ${cities[cities.length - 1]}`;
+  } else {
+    return cities.reduce((acc, city, index) => {
+      if (index !== cities.length - 1) {
+        acc += `${city} &mdash; `;
+      } else {
+        acc += `${city}`;
+      }
+      return acc;
+    }, '');
+  }
+}
+
+function getTripInfoStartDate(sortedPoints) { //
+  return dayjs(sortedPoints[0].dateFrom).format('MMM DD');
+}
+
+function getTripInfoEndDate(sortedPoints) { //
+  const startDate = sortedPoints[0].dateFrom;
+  const endDate = sortedPoints[sortedPoints.length - 1].dateTo;
+  if (dayjs(startDate).format('MMM') === dayjs(endDate).format('MMM')) {
+    return dayjs(endDate).format('DD');
+  } else {
+    return dayjs(endDate).format('MMM DD');
+  }
+}
+
+
 export { getRandomNumber, getRandomArrayElement, humanizeDate, getDateDuration, getNewRandomValidDate,
   isFutureDate, isPastDate, isPresentDate,
   getRoutePointsDayDiff, getRoutePointsEventDiff, getRoutePointsPriceDiff, getRoutePointsDurationDiff, getRoutePointsOfferDiff,
   sortRoutePoints,
-  isMajorDiff
+  updatePoints,
+  isMajorDiff,
+  adaptToServer, adaptToClient,
+  getOffersCost, getTripCost,
+  getTripInfoTitle, getTripInfoStartDate, getTripInfoEndDate
 };

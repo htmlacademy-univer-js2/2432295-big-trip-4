@@ -46,7 +46,7 @@ export default class RoutePointPresenter {
 
     this.#editRoutePointComponent = new NewEditFormView({
       routePoint: this.#routePoint,
-      offers: this.#offersModel.offers,
+      offersModel: this.#offersModel,
       destinations: this.#destinationsModel.destinations,
 
       onEditFormResetClick: this.#onEditFormReset,

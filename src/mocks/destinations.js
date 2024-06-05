@@ -1,4 +1,4 @@
-import { CITIES, DESCRIPTION, PHOTO_ADDRESS } from '../const';
+/*import { CITIES, DESCRIPTION, PHOTO_ADDRESS } from '../const';
 
 function getRandomDestination(destination, id) {
   return {
@@ -16,4 +16,4 @@ const generateDestinations = () => CITIES.map((city, id) => getRandomDestination
 
 const getAllDestinations = () => CITIES;
 
-export { generateDestinations, getAllDestinations };
+export { generateDestinations, getAllDestinations };*/

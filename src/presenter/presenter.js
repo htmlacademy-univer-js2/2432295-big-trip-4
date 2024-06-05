@@ -1,4 +1,4 @@
-import { render, remove } from '../framework/render.js';
+import { RenderPosition, render, remove } from '../framework/render.js';
 import { sortRoutePoints } from '../utils.js';
 import {
   SORT_TYPE, FILTER_TYPE, FILTER_OPTIONS,
@@ -11,6 +11,7 @@ import CreateRoutePointPresenter from './create-point-presenter.js';
 
 import NewRoutePointsView from '../view/route-points-list-view.js';
 import NewEmptyRoutePointsView from '../view/empty-route-point-list-view.js';
+import NewTripInfoView from '../view/trip-info-view.js';
 
 
 export default class Presenter {
@@ -41,6 +42,7 @@ export default class Presenter {
 
   #routePointsComponent = new NewRoutePointsView();
   #emptyPointListComponent = null;
+  #tripInfoComponent = null;
 
   #currentSortType = SORT_TYPE.DAY;
   #isCreatingModeNow = false;
@@ -66,9 +68,15 @@ export default class Presenter {
       return;
     }
 
+    this.#renderTripInfo();
     this.#renderSort();
     this.#renderRoutePointList();
     this.#renderRoutePoints();
+  }
+
+  #renderTripInfo() { //
+    this.#tripInfoComponent = new NewTripInfoView(this.routePoints, this.#destinationsModel.destinations, this.#offersModel.offers);
+    render(this.#tripInfoComponent, this.#container.TRIP_INFO, RenderPosition.AFTERBEGIN);
   }
 
   #renderSort() {
@@ -137,6 +145,12 @@ export default class Presenter {
         this.#clearTrip({ sortTypeReset: true });
         this.#renderTrip();
         break;
+      case UPDATE_TYPE.INIT:
+        //this.#isLoading = false;
+        //this.#addPointButton.disabled = false;
+        this.#clearTrip();
+        this.#renderTrip();
+        break;
     }
   };
 
@@ -195,6 +209,7 @@ export default class Presenter {
     this.#routePointPresenters.forEach((presenter) => presenter.destroy());
     this.#routePointPresenters.clear();
     remove(this.#emptyPointListComponent);
+    remove(this.#tripInfoComponent);
 
     if (sortTypeReset) {
       this.#currentSortType = SORT_TYPE.DAY;

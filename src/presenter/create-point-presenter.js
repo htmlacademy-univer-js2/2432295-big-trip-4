@@ -25,7 +25,7 @@ export default class CreateRoutePointPresenter {
   init = () => {
     if (!this.#createRoutePointComponent) {
       this.#createRoutePointComponent = new NewEditFormView({
-        offers: this.#offersModel.offers,
+        offersModel: this.#offersModel,
         destinations: this.#destinationsModel.destinations,
         onEditFormResetClick: this.#handleFormClose,
         onEditFormSubmitClick : this.#handleEditFormSubmit,
@@ -44,7 +44,7 @@ export default class CreateRoutePointPresenter {
   };
 
   #handleEditFormSubmit = (routePoint) => {
-    if (routePoint.destination !== null) {
+    if (routePoint.destination !== null && routePoint.basePrice > 0) {
       this.#handleDataChange(
         USER_ACTION.ADD_POINT,
         UPDATE_TYPE.MINOR,

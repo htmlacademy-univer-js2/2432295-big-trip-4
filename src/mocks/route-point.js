@@ -1,4 +1,4 @@
-import { POINT_TYPES, RANDOM_PRICE_MIN_LIMIT, RANDOM_PRICE_MAX_LIMIT } from '../const';
+/*import { POINT_TYPES, RANDOM_PRICE_MIN_LIMIT, RANDOM_PRICE_MAX_LIMIT } from '../const';
 import { getRandomArrayElement, getRandomNumber, getNewRandomValidDate } from '../utils';
 import { generateDestinations } from './destinations';
 import { generateOffersByType } from './offers';
@@ -22,4 +22,4 @@ function getRandomRoutePoint() {
   };
 }
 
-export { getRandomRoutePoint };
+export { getRandomRoutePoint };*/
