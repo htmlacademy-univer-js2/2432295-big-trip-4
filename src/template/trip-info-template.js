@@ -3,8 +3,9 @@ import { getTripCost, getTripInfoTitle, getTripInfoEndDate, getTripInfoStartDate
 export function createTripInfoTemplate(routePoints, destinations, offers) {
   const totalCost = getTripCost(routePoints, offers);
   const sortedPoints = routePoints.sort((firstDate, secondDate) => new Date(firstDate.dateFrom) - new Date(secondDate.dateFrom));
-  const cities = sortedPoints.map((point) => destinations.find((destination) => destination.id === point.destination).name);
-  const tripInfoTitle = getTripInfoTitle(cities);
+  const currentDestinations = sortedPoints.map((point) => destinations.find((destination) => destination.id === point.destination).name);
+  const tripInfoTitle = getTripInfoTitle(currentDestinations);
+
   return (
     `<section class="trip-main__trip-info  trip-info">
             <div class="trip-info__main">

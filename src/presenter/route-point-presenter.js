@@ -104,10 +104,14 @@ export default class RoutePointPresenter {
   };
 
   #onEditFormReset = () => {
-    this.#editRoutePointComponent.reset(this.#routePoint);
+    if (this.#editRoutePointComponent._state.isActive) {
+      this.#editRoutePointComponent.reset(this.#routePoint);
 
-    this.#replaceEditToPoint();
-    document.removeEventListener('keydown', this.#escKeyHandler);
+      this.#replaceEditToPoint();
+      document.removeEventListener('keydown', this.#escKeyHandler);
+
+      this.#currentMode = EDIT_TYPE.DEFAULT;
+    }
   };
 
   #onEditFormDelete = (routePoint) => { // handleDeleteClick
@@ -190,7 +194,7 @@ export default class RoutePointPresenter {
       };
       this.#editRoutePointComponent.shake(resetFormState);
     } else {
-      this.#editRoutePointComponent.shake();
+      this.#routePointComponent.shake();
     }
   }
 }

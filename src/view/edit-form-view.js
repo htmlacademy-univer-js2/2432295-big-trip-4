@@ -119,6 +119,15 @@ export default class NewEditFormView extends AbstractStatefulView {
         },
       );
     }
+    else {
+      this.#datepickerFrom = flatpickr(
+        dateFromElement,
+        {
+          ...config,
+          onClose: this.#handleRoutePointDateFromClose,
+        },
+      );
+    }
 
     if (this._state.dateTo) {
       this.#datepickerTo = flatpickr(
@@ -127,6 +136,15 @@ export default class NewEditFormView extends AbstractStatefulView {
           ...config,
           defaultDate: this._state.dateTo,
           minDate: this._state.dateFrom,
+          onClose: this.#handleRoutePointDateToClose,
+        },
+      );
+    }
+    else {
+      this.#datepickerTo = flatpickr(
+        dateToElement,
+        {
+          ...config,
           onClose: this.#handleRoutePointDateToClose,
         },
       );
@@ -215,15 +233,14 @@ export default class NewEditFormView extends AbstractStatefulView {
   };
 
   reset(routePoint) {
-    this.updateElement({
-      routePoint
-    });
+    this.updateElement(
+      NewEditFormView.parsePointToState(routePoint)
+    );
   }
 
   get template() {
     return createEditFormTemplate( { //this._state, this.#offersByType, this.#destinations, this.#mode
       state: this._state,
-      routePoint: this._state,
       offersModel: this.#offersModel,
       destinations: this.#destinations,
       editPointType: this.#editPointType,

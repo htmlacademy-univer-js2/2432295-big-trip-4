@@ -2,10 +2,10 @@ import AbstractView from '../framework/view/abstract-view';
 import { createTripInfoTemplate } from '../template/trip-info-template';
 
 export default class NewTripInfoView extends AbstractView {
-  constructor(points, destinations, offers) {
+  constructor(routePoints, destinations, offers) {
     super();
 
-    this.#routePoints = points;
+    this.#routePoints = routePoints;
     this.#destinations = destinations;
     this.#offers = offers;
   }

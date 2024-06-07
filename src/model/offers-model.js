@@ -1,8 +1,5 @@
-//import { getOffers } from '../mocks/offers';
-
 export default class OffersModel {
   constructor(apiService) {
-    //this.#offers = getOffers();
     this.#apiService = apiService;
   }
 

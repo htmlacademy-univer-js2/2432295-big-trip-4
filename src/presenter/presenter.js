@@ -1,7 +1,8 @@
-import { RenderPosition, render, remove } from '../framework/render.js';
+import { RenderPosition, render, remove, replace } from '../framework/render.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker';
-import { sortRoutePoints } from '../utils.js';
+
 import { SORT_TYPE, FILTER_TYPE, FILTER_OPTIONS, UPDATE_TYPE, USER_ACTION, TIME_LIMIT } from '../const.js';
+import { sortRoutePoints } from '../utils.js';
 
 import SortPresenter from './sort-presenter.js';
 import RoutePointPresenter from './route-point-presenter';
@@ -91,9 +92,35 @@ export default class Presenter {
   }
 
   #renderTripInfo() { //
-    this.#tripInfoComponent = new NewTripInfoView(this.routePoints, this.#destinationsModel.destinations, this.#offersModel.offers);
+    const points = this.#pointsModel.routePoints;
+    const destinations = this.#destinationsModel.destinations;
+    const offers = this.#offersModel.offers;
+
+    this.#tripInfoComponent = new NewTripInfoView(points, destinations, offers);
+
     render(this.#tripInfoComponent, this.#container.TRIP_INFO, RenderPosition.AFTERBEGIN);
   }
+  /*#renderTripInfo = () => {
+    const prevNewTripInfoComponent = this.#tripInfoComponent;
+
+    const points = this.#pointsModel.routePoints;
+    const destinations = this.#destinationsModel.destinations;
+    const offers = this.#offersModel.offers;
+
+    this.#tripInfoComponent = new NewTripInfoView(points, destinations, offers);
+
+    //this.#tripInfoComponent = new NewTripInfoView(this.routePoints, this.#destinationsModel.destinations, this.#offersModel.offers);
+
+    if (!prevNewTripInfoComponent) {
+      render(this.#tripInfoComponent, this.#container.TRIP_INFO, RenderPosition.AFTERBEGIN);
+      return;
+    }
+
+    replace(this.#tripInfoComponent, prevNewTripInfoComponent);
+    remove(prevNewTripInfoComponent);
+    console.log(this.#tripInfoComponent.element);
+  };*/
+
 
   #renderSort() {
     this.#sortPresenter = new SortPresenter({
@@ -165,6 +192,7 @@ export default class Presenter {
     switch (updateType) {
       case UPDATE_TYPE.PATCH:
         this.#routePointPresenters.get(data.id).init(data);
+        this.#renderTripInfo();
         break;
       case UPDATE_TYPE.MINOR:
         this.#clearTrip();
@@ -236,16 +264,23 @@ export default class Presenter {
       container: this.#routePointsComponent.element,
       destinationsModel: this.#destinationsModel,
       offersModel: this.#offersModel,
+      createRoutePointButton: this.#createRoutePointButtonPresenter,
       onDataChange: this.#handleViewAction,
       onDestroy: this.#handleCreatePointButtonDestroy,
     });
-    this.#createRoutePointButtonPresenter.disableButton();
+
+    if(this.#emptyPointListComponent){ //
+      remove(this.#emptyPointListComponent);
+      render(this.#emptyPointListComponent, this.#container.EVENTS);
+    }
 
     this.#isCreatingModeNow = true;
     this.#currentSortType = SORT_TYPE.DAY;
     this.#filterModel.set(UPDATE_TYPE.MAJOR, FILTER_TYPE.EVERYTHING);
 
     this.#createRoutePointPresenter.init();
+
+    this.#createRoutePointButtonPresenter.disableButton();
   };
 
 

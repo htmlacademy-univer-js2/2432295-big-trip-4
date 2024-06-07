@@ -12,13 +12,17 @@ export default class CreateRoutePointPresenter {
   #handleDataChange = null;
   #handleDestroy = null;
 
+  #createRoutePointButton = null; // createRoutePointButton
+
   #mode = null;
 
-  constructor ({container, destinationsModel, offersModel, onDataChange, onDestroy}) {
+  constructor ({container, destinationsModel, offersModel, createRoutePointButton, onDataChange, onDestroy}) {
     this.#container = container;
 
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
+
+    this.#createRoutePointButton = createRoutePointButton;
 
     this.#mode = MODE.CREATING;
 
@@ -64,21 +68,19 @@ export default class CreateRoutePointPresenter {
 
 
   #handleFormClose = () => {
-    //this.#addPointButton.disabled = false;
+    this.#createRoutePointButton.disableButton();
     this.destroy();
   };
 
   #handleEditFormSubmit = (routePoint) => {
-    if (routePoint.destination !== null && routePoint.basePrice > 0) {
-      //this.#addPointButton.disabled = false;
+    if (routePoint.destination !== null) {
+      this.#createRoutePointButton.disableButton();
 
       this.#handleDataChange(
         USER_ACTION.ADD_POINT,
         UPDATE_TYPE.MINOR,
         routePoint
       );
-
-      this.destroy({ isCanceled: false });
     }
   };
 

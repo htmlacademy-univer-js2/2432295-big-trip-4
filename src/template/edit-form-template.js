@@ -42,7 +42,7 @@ export function createEditFormTemplate({ state, destinations, offersModel, editP
                       <span class="visually-hidden">Price</span>
                       &euro;
                     </label>
-                    <input class="event__input  event__input--price" id="event-price-${id}" type="number" name="event-price" value="${basePrice}" ${isActive ? '' : 'disabled'}>
+                    <input class="event__input  event__input--price" id="event-price-${id}" type="number" name="event-price" min="0" max="100000" value="${basePrice}" ${isActive ? '' : 'disabled'}>
                   </div>
 
                   <button class="event__save-btn  btn  btn--blue" type="submit"
@@ -56,10 +56,7 @@ export function createEditFormTemplate({ state, destinations, offersModel, editP
                 </header>
 
                 <section class="event__details">
-                  <section class="event__section  event__section--offers">
-                    ${createOffersList(currentOffersByType, offers, isActive)}
-                  </section>
-
+                  ${createOffersList(currentOffersByType, offers, isActive)}
                   ${(currentDestination) ? createDestinationTemplate(currentDestination) : ''}
                 </section>
               </form>
@@ -143,14 +140,17 @@ function createOffersList(offers, selectedOffers, isActive) {
             </div>`);
   }).join('');
 
-  return `<h3 class="event__section-title  event__section-title--offers">Offers</h3>
-          <div class="event__available-offers">${offerItems}</div>`;
+  return `<section class="event__section  event__section--offers">
+            <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+            <div class="event__available-offers">${offerItems}</div>
+          </section>`;
 }
 
 function createPhotosList(photos) {
-  return (`        <div class="event__photos-container">
-                      <div class="event__photos-tape">
-                      ${photos.map((photo) => `<img class="event__photo" src="${photo.src}" alt="${photo.description}">`).join('')}
-                      </div>
-                    </div>`);
+  return !photos || photos.length === 0 ? '' :
+    (`<div class="event__photos-container">
+        <div class="event__photos-tape">
+        ${photos.map((photo) => `<img class="event__photo" src="${photo.src}" alt="${photo.description}">`).join('')}
+        </div>
+      </div>`);
 }
