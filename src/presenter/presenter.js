@@ -1,140 +1,129 @@
-import { render, remove } from '../framework/render.js';
-import { sortPoints, FILTER_OPTIONS } from '../utils.js'; // filterPoints
-import { SORT_TYPE, FILTER_TYPE, UPDATE_TYPE, USER_ACTION } from '../const.js'; //
+import { RenderPosition, render, remove } from '../framework/render.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker';
 
-//import NewTripInfoView from '../view/trip-info-view';
-import NewRoutePointsView from '../view/route-points-list-view.js';
-import NewEmptyRoutePointsView from '../view/empty-route-point-list-view.js'; //
+import { SORT_TYPE, FILTER_TYPE, FILTER_OPTIONS, UPDATE_TYPE, USER_ACTION, TIME_LIMIT } from '../const.js';
+import { sortRoutePoints } from '../utils.js';
 
-
-//import FilterPresenter from './filter-presenter.js';
 import SortPresenter from './sort-presenter.js';
 import RoutePointPresenter from './route-point-presenter';
-import CreatePointPresenter from './create-point-presenter.js'; //
+import CreateRoutePointPresenter from './create-point-presenter.js';
+
+import RoutePointsListView from '../view/route-points-list-view.js';
+import EmptyRoutePointsView from '../view/empty-route-point-list-view.js';
+import TripInfoView from '../view/trip-info-view.js';
 
 
 export default class Presenter {
-  constructor({ container, pointsModel, offersModel, destinationsModel, filterModel, createPointButtonPresenter }) {
+  constructor({ container, pointsModel, offersModel, destinationsModel, filterModel,
+    createRoutePointButtonPresenter }) {
     this.#container = container;
 
     this.#pointsModel = pointsModel;
-    this.#offerModel = offersModel;
-    this.#filterModel = filterModel; //
-    this.#destinationModel = destinationsModel;
+    this.#offersModel = offersModel;
+    this.#destinationsModel = destinationsModel;
+    this.#filterModel = filterModel;
 
-    this.#createPointButtonPresenter = createPointButtonPresenter; //
-    this.#createPointPresenter = new CreatePointPresenter({ // зачем в конструкторе + rn
-      container: this.#routePointsComponent.element,
-      destinationModel: this.#destinationModel,
-      offersModel: this.#offerModel,
-      onDataChange: this.#viewActionHandler,
-      onDestroy: this.#createPointButtonDestroyHandler,
-    });
+    this.#createRoutePointButtonPresenter = createRoutePointButtonPresenter;
 
-    /*this.#tripInfoViewComponent = new NewTripInfoView(this.#routePoints, this.#destinationModel);
-    this.#routePointsComponent = new NewRoutePointsView(this.#routePoints);
-
-    this.#routePoints = sortPoints([...this.#pointsModel.routePoints]);*/
-
-    this.#pointsModel.addObserver(this.#modelEventHandler); //
-    this.#filterModel.addObserver(this.#modelEventHandler); //
+    this.#pointsModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   #container = null;
+
   #pointsModel = null;
-  #offerModel = null;
-  #filterModel = null; //
-  #destinationModel = null;
+  #offersModel = null;
+  #filterModel = null;
+  #destinationsModel = null;
 
-  #routePointsComponent = new NewRoutePointsView();
-  #emptyPointListComponent = null;
-  //#tripInfoViewComponent = null;
-
-  //#routePoints = [];
-
-  // rn
-  #currentSortType = SORT_TYPE.DAY;
-  #isCreating = false;
-  #createPointButtonPresenter = null;
-  #createPointPresenter = null;
+  #createRoutePointButtonPresenter = null;
+  #createRoutePointPresenter = null;
   #sortPresenter = null;
-  //
-
   #routePointPresenters = new Map();
+
+  #routePointsListComponent = new RoutePointsListView();
+  #emptyRoutePointsListComponent = null;
+  #tripInfoComponent = null;
+
+  #currentSortType = SORT_TYPE.DAY;
+  #isCreatingMode = false;
+
+  #isLoading = true;
+  #isLoadingError = false;
+
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TIME_LIMIT.LOWER_LIMIT,
+    upperLimit: TIME_LIMIT.UPPER_LIMIT
+  });
 
 
   get routePoints() {
     const filterType = this.#filterModel.getFilter();
     const routePoints = this.#pointsModel.routePoints;
-    const filteredPoints = FILTER_OPTIONS[filterType](routePoints); // rn
+    const filteredPoints = FILTER_OPTIONS[filterType](routePoints);
 
-    return sortPoints(filteredPoints, this.#currentSortType);
+    return sortRoutePoints(filteredPoints, this.#currentSortType);
   }
 
 
   init() {
-    this.#renderTrip(); //
+    this.#renderTrip();
   }
 
+
   #renderTrip() {
-    if (!this.routePoints.length && !this.#isCreating) {
-      this.#renderEmptyList();
+    if (this.#isLoading) {
+      this.#renderEmptyRoutePointsList({ isLoading: true });
       return;
     }
 
-    //this.#renderTripInfo();
+    if (this.#isLoadingError) {
+      this.#renderEmptyRoutePointsList({ isLoadingError: true });
+      return;
+    }
 
-    //this.#renderFilter();
+    if (!this.routePoints.length && !this.#isCreatingMode) {
+      this.#renderEmptyRoutePointsList();
+      return;
+    }
+
+    this.#renderTripInfo();
     this.#renderSort();
-
-    this.#renderRoutePointList();
+    this.#renderRoutePointsList();
     this.#renderRoutePoints();
   }
 
-  /*
   #renderTripInfo() {
-    render(this.#tripInfoViewComponent, this.#container.tripInfo, RenderPosition.AFTERBEGIN);
-  }
+    const routePoints = this.#pointsModel.routePoints;
+    const destinations = this.#destinationsModel.destinations;
+    const offers = this.#offersModel.offers;
 
-  #renderFilter() {
-    const filterPresenter = new FilterPresenter({
-      container: this.#container.filter,
-      routePoints: this.#routePoints
-    });
+    this.#tripInfoComponent = new TripInfoView(routePoints, destinations, offers);
 
-    filterPresenter.init();
+    render(this.#tripInfoComponent, this.#container.TRIP_INFO, RenderPosition.AFTERBEGIN);
   }
-  */
 
   #renderSort() {
     this.#sortPresenter = new SortPresenter({
-      container: this.#container.events,
+      container: this.#container.EVENTS,
+      currentSortType: this.#currentSortType,
       onSortTypeChange: this.#handleSortTypeChange,
-      currentSortType: this.#currentSortType
     });
 
     this.#sortPresenter.init();
   }
 
-  #handleSortTypeChange = (sortType) => {
-    //this.#routePoints = sortPoints(this.#routePoints, sortType);
-
-    if (this.#currentSortType === sortType) {
-      return;
-    }
-    this.#currentSortType = sortType;
-    this.#clearRoutePoints();
-    this.#renderRoutePoints();
-  };
-
-
-  #renderRoutePointList() {
-    render(this.#routePointsComponent, this.#container.events);
+  #renderRoutePointsList() {
+    render(this.#routePointsListComponent, this.#container.EVENTS);
   }
 
-  #renderEmptyList = () => {
-    this.#emptyPointListComponent = new NewEmptyRoutePointsView(this.#filterModel.getFilter());
-    render(this.#emptyPointListComponent, this.#container.events);
+  #renderEmptyRoutePointsList = ({ isLoading = false, isLoadingError = false } = {}) => {
+    this.#emptyRoutePointsListComponent = new EmptyRoutePointsView({
+      currentFilterType: this.#filterModel.getFilter(),
+      isLoading,
+      isLoadingError
+    });
+    render(this.#emptyRoutePointsListComponent, this.#container.EVENTS);
   };
 
   #renderRoutePoints() {
@@ -143,47 +132,106 @@ export default class Presenter {
 
   #renderRoutePoint = (routePoint) => {
     const routePointPresenter = new RoutePointPresenter({
-      routePointListcontainer: this.#routePointsComponent.element,
-      offersModel: this.#offerModel,
-      destinationsModel: this.#destinationModel,
+      container: this.#routePointsListComponent.element,
+      offersModel: this.#offersModel,
+      destinationsModel: this.#destinationsModel,
 
-      onDataChange: this.#viewActionHandler, //onDataChange
-      onModeChange: this.#modeChangeHandler, //onModeChange
+      onDataChange: this.#handleViewAction,
+      onModeChange: this.#handleModeChange
     });
+
+    if (this.#emptyRoutePointsListComponent) {
+      remove(this.#emptyRoutePointsListComponent);
+      this.#renderRoutePointsList();
+    }
 
     routePointPresenter.init(routePoint);
     this.#routePointPresenters.set(routePoint.id, routePointPresenter);
   };
 
-  /*
-  #handlePointChange = (updatedPoint) => {
-    this.#routePoints = updatePoint(this.#routePoints, updatedPoint);
-    this.#routePointPresenters.get(updatedPoint.id).init(updatedPoint);
-  };
-  */
 
-  #modeChangeHandler = () => {
+  #handleSortTypeChange = (sortType) => {
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+    this.#currentSortType = sortType;
+
+    this.#clearRoutePoints();
+    this.#renderRoutePoints();
+  };
+
+  #handleModeChange = () => {
+    if (this.#createRoutePointPresenter !== null) {
+      this.#createRoutePointPresenter.destroy();
+    }
+
     this.#routePointPresenters.forEach((routePointPresenter) => routePointPresenter.initialStateView());
   };
 
-  #clearRoutePoints = () => {
-    this.#routePointPresenters.forEach((routePointPresenter) => routePointPresenter.destroy());
-    this.#routePointPresenters.clear();
-    this.#createPointPresenter.destroy(); //
+  #handleModelEvent = (updateType, data) => {
+    switch (updateType) {
+      case UPDATE_TYPE.PATCH:
+        this.#routePointPresenters.get(data.id).init(data);
+        this.#renderTripInfo();
+        break;
+      case UPDATE_TYPE.MINOR:
+        this.#clearTrip();
+        this.#renderTrip();
+        break;
+      case UPDATE_TYPE.MAJOR:
+        this.#clearTrip({ sortTypeReset: true });
+        this.#renderTrip();
+        break;
+      case UPDATE_TYPE.INIT:
+        if (data.isError) {
+          this.#isLoadingError = data.isError;
+        }
+        this.#isLoading = false;
+        this.#clearTrip();
+        this.#renderTrip();
+        break;
+    }
   };
 
+  #handleViewAction = async (actionType, updateType, update) => {
+    this.#uiBlocker.block();
 
-  createPointButtonClickHandler = () => { //
-    this.#isCreating = true;
-    this.#currentSortType = SORT_TYPE.DAY;
-    this.#filterModel.set(UPDATE_TYPE.MAJOR, FILTER_TYPE.EVERYTHING);
-    this.#createPointButtonPresenter.disableButton();
-    this.#createPointPresenter.init();
+    switch (actionType) {
+      case USER_ACTION.UPDATE_POINT:
+        this.#routePointPresenters.get(update.id).setSaving();
+        try {
+          await this.#pointsModel.updateRoutePoint(updateType, update);
+        } catch (err) {
+          this.#routePointPresenters.get(update.id).setAborting();
+        }
+        break;
+
+      case USER_ACTION.ADD_POINT:
+        this.#createRoutePointPresenter.setSaving();
+        try {
+          await this.#pointsModel.addRoutePoint(updateType, update);
+        } catch (err) {
+          this.#createRoutePointPresenter.setAborting();
+        }
+        break;
+
+      case USER_ACTION.DELETE_POINT:
+        this.#routePointPresenters.get(update.id).setDeleting();
+        try {
+          await this.#pointsModel.deleteRoutePoint(updateType, update);
+        } catch (err) {
+          this.#routePointPresenters.get(update.id).setAborting();
+        }
+        break;
+    }
+
+    this.#uiBlocker.unblock();
   };
 
-  #createPointButtonDestroyHandler = ({isCanceled}) => { //
-    this.#isCreating = false;
-    this.#createPointButtonPresenter.enableButton();
+  #handleCreatePointButtonDestroy = ({ isCanceled }) => {
+    this.#isCreatingMode = false;
+    this.#createRoutePointButtonPresenter.enableButton();
+
     if (!this.routePoints.length && isCanceled) {
       this.#clearTrip();
       this.#renderTrip();
@@ -191,49 +239,51 @@ export default class Presenter {
   };
 
 
-  #viewActionHandler = (actionType, updateType, update) => { // handleViewAction
-    switch (actionType) {
-      case USER_ACTION.UPDATE_POINT:
-        this.#pointsModel.update(updateType, update);
-        break;
-      case USER_ACTION.DELETE_POINT:
-        this.#pointsModel.delete(updateType, update);
-        break;
-      case USER_ACTION.ADD_POINT:
-        this.#pointsModel.add(updateType, update);
-        break;
+  createRoutePointButtonClickHandler = () => {
+    this.#createRoutePointPresenter = new CreateRoutePointPresenter({
+      container: this.#routePointsListComponent.element,
+      destinationsModel: this.#destinationsModel,
+      offersModel: this.#offersModel,
+      createRoutePointButton: this.#createRoutePointButtonPresenter,
+      onDataChange: this.#handleViewAction,
+      onDestroy: this.#handleCreatePointButtonDestroy,
+    });
+
+    if (this.#emptyRoutePointsListComponent) {
+      remove(this.#emptyRoutePointsListComponent);
+      render(this.#emptyRoutePointsListComponent, this.#container.EVENTS);
     }
+
+    this.#isCreatingMode = true;
+    this.#currentSortType = SORT_TYPE.DAY;
+    this.#filterModel.set(UPDATE_TYPE.MAJOR, FILTER_TYPE.EVERYTHING);
+
+    this.#createRoutePointPresenter.init();
+
+    this.#createRoutePointButtonPresenter.disableButton();
   };
 
-  #modelEventHandler = (updateType, data) => { // handleModelEvent
-    switch (updateType) {
-      case UPDATE_TYPE.PATCH:
-        this.#routePointPresenters.get(data.id).init(data);
-        break;
-      case UPDATE_TYPE.MINOR:
-        this.#clearTrip();
-        this.#renderTrip();
-        break;
-      case UPDATE_TYPE.MAJOR:
-        this.#clearTrip({ resetSortType: true });
-        this.#renderTrip();
-        break;
-    }
+
+  #clearRoutePoints = () => {
+    this.#routePointPresenters.forEach((routePointPresenter) => routePointPresenter.destroy());
+    this.#routePointPresenters.clear();
+    this.#createRoutePointPresenter?.destroy();
   };
 
-  #clearTrip = ({resetSortType = false} = {}) => { //
+  #clearTrip = ({ sortTypeReset = false } = {}) => {
     this.#clearRoutePoints();
-    this.#createPointPresenter.destroy();
+    this.#createRoutePointPresenter?.destroy();
     this.#routePointPresenters.forEach((presenter) => presenter.destroy());
     this.#routePointPresenters.clear();
-    remove(this.#emptyPointListComponent);
+    remove(this.#emptyRoutePointsListComponent);
+    remove(this.#tripInfoComponent);
 
+    if (sortTypeReset) {
+      this.#currentSortType = SORT_TYPE.DAY;
+    }
     if (this.#sortPresenter) {
       this.#sortPresenter.destroy();
       this.#sortPresenter = null;
-    }
-    if (resetSortType) {
-      this.#currentSortType = SORT_TYPE.DAY;
     }
   };
 }

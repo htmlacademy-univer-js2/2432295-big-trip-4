@@ -2,7 +2,7 @@ import AbstractView from '../framework/view/abstract-view';
 import { createRoutePointsListTemplate } from '../template/route-points-list-template';
 
 
-export default class NewRoutePointsView extends AbstractView{
+export default class RoutePointsListView extends AbstractView{
   constructor() {
     super();
   }

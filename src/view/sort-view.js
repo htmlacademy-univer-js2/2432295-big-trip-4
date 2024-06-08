@@ -1,7 +1,7 @@
 import AbstractView from '../framework/view/abstract-view';
 import { createSortTemplate } from '../template/sort-template';
 
-export default class NewSortView extends AbstractView {
+export default class SortView extends AbstractView {
   constructor({ sorts, onSortChange }) {
     super();
 
