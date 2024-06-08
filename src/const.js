@@ -1,8 +1,10 @@
-import { getRoutePointsDayDiff, getRoutePointsEventDiff, getRoutePointsPriceDiff,
-  getRoutePointsDurationDiff, getRoutePointsOfferDiff, isFutureDate, isPastDate, isPresentDate } from './utils';
+import {
+  getRoutePointsDayDifference, getRoutePointsEventDifference, getRoutePointsPriceDifference,
+  getRoutePointsDurationDifference, getRoutePointsOfferDifference, isFutureDate, isPastDate, isPresentDate
+} from './utils';
 
 
-const POINT_TYPES = [
+const ROUTE_POINT_TYPES = [
   'taxi',
   'bus',
   'train',
@@ -25,6 +27,7 @@ const DATE_PERIODS = {
   MSEC_IN_DAY: 24 * 60 * 60 * 1000
 };
 
+
 const DEFAULT_TYPE = 'flight';
 const DEFAULT_DESTINATION_ID = null;
 
@@ -39,7 +42,7 @@ const POINT_EMPTY = {
   id: crypto.randomUUID(),
   basePrice: 0,
   dateFrom: null,
-  dateTo:  null,
+  dateTo: null,
   destination: DEFAULT_DESTINATION_ID,
   isFavorite: false,
   offers: [],
@@ -55,10 +58,10 @@ const FILTER_TYPE = {
 };
 
 const FILTER_OPTIONS = {
-  [FILTER_TYPE.EVERYTHING]: (points) => points,
-  [FILTER_TYPE.FUTURE]: (points) => points.filter((point) => isFutureDate(point.dateFrom)),
-  [FILTER_TYPE.PRESENT]: (points) => points.filter((point) => isPresentDate(point.dateFrom, point.dateTo)),
-  [FILTER_TYPE.PAST]: (points) => points.filter((point) => isPastDate(point.dateTo)),
+  [FILTER_TYPE.EVERYTHING]: (routePoints) => routePoints,
+  [FILTER_TYPE.FUTURE]: (routePoints) => routePoints.filter((routePoint) => isFutureDate(routePoint.dateFrom)),
+  [FILTER_TYPE.PRESENT]: (routePoints) => routePoints.filter((routePoint) => isPresentDate(routePoint.dateFrom, routePoint.dateTo)),
+  [FILTER_TYPE.PAST]: (routePoints) => routePoints.filter((routePoint) => isPastDate(routePoint.dateTo)),
 };
 
 
@@ -79,11 +82,11 @@ const ENABLED_SORT_TYPE = {
 };
 
 const SORT_OPTIONS = {
-  [SORT_TYPE.DAY]: (routePoints) => routePoints.sort(getRoutePointsDayDiff),
-  [SORT_TYPE.EVENT]: (routePoints) => routePoints.sort(getRoutePointsEventDiff),
-  [SORT_TYPE.PRICE]: (routePoints) => routePoints.sort(getRoutePointsPriceDiff),
-  [SORT_TYPE.TIME]: (routePoints) => routePoints.sort(getRoutePointsDurationDiff),
-  [SORT_TYPE.OFFER]: (routePoints) => routePoints.sort(getRoutePointsOfferDiff),
+  [SORT_TYPE.DAY]: (routePoints) => routePoints.sort(getRoutePointsDayDifference),
+  [SORT_TYPE.EVENT]: (routePoints) => routePoints.sort(getRoutePointsEventDifference),
+  [SORT_TYPE.PRICE]: (routePoints) => routePoints.sort(getRoutePointsPriceDifference),
+  [SORT_TYPE.TIME]: (routePoints) => routePoints.sort(getRoutePointsDurationDifference),
+  [SORT_TYPE.OFFER]: (routePoints) => routePoints.sort(getRoutePointsOfferDifference),
 };
 
 
@@ -114,12 +117,8 @@ const USER_ACTION = {
   DELETE_POINT: 'DELETE',
 };
 
-const EDIT_TYPE = { // rn MODE, editPointType rn editPointMode
-  DEFAULT: 'DEFAULT',
-  EDITING: 'EDITING',
-  CREATING: 'CREATING',
-};
-const MODE = { //
+
+const MODE = {
   DEFAULT: 'DEFAULT',
   EDITING: 'EDITING',
   CREATING: 'CREATING',
@@ -131,7 +130,7 @@ const TIME_LIMIT = {
   UPPER_LIMIT: 1000
 };
 
-const EDIT_POINT_VIEW_BUTTON_TEXT = { //
+const EDIT_POINT_VIEW_BUTTON_TEXT = {
   SAVE: 'Save',
   DELETE: 'Delete',
   CANCEL: 'Cancel',
@@ -140,15 +139,28 @@ const EDIT_POINT_VIEW_BUTTON_TEXT = { //
 };
 
 
-export {DATE_FORMAT, DATE_PERIODS,
-  POINT_TYPES, POINT_EMPTY,
+const AUTHORIZATION = 'Basic cm9vdDpyb290';
+const END_POINT = 'https://21.objects.htmlacademy.pro/big-trip';
+
+const API_METHODS = {
+  GET: 'GET',
+  PUT: 'PUT',
+  POST: 'POST',
+  DELETE: 'DELETE',
+};
+
+
+export {
+  DATE_FORMAT, DATE_PERIODS,
+  ROUTE_POINT_TYPES, POINT_EMPTY,
   FILTER_TYPE, FILTER_OPTIONS,
   SORT_TYPE, SORT_OPTIONS, ENABLED_SORT_TYPE,
   CONTAINER,
   WARNING_MESSAGE,
   MODE,
-  UPDATE_TYPE, USER_ACTION, EDIT_TYPE,
+  UPDATE_TYPE, USER_ACTION,
   DEFAULT_DESTINATION,
   TIME_LIMIT,
-  EDIT_POINT_VIEW_BUTTON_TEXT
+  EDIT_POINT_VIEW_BUTTON_TEXT,
+  AUTHORIZATION, END_POINT, API_METHODS
 };

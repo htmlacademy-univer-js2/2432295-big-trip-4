@@ -1,12 +1,12 @@
-import { POINT_TYPES, EDIT_TYPE, DEFAULT_DESTINATION, EDIT_POINT_VIEW_BUTTON_TEXT } from '../const';
+import { ROUTE_POINT_TYPES, MODE, DEFAULT_DESTINATION, EDIT_POINT_VIEW_BUTTON_TEXT } from '../const';
 import { humanizeDate } from '../utils';
 
 
-export function createEditFormTemplate({ state, destinations, offersModel, editPointType }) {
+export function createEditFormTemplate({ state, destinations, offersModel, editPointMode }) {
   const { id, type, basePrice, dateFrom, dateTo, offers,
     isActive, isSaving, isDeleting, destination } = state;
 
-  const isCreating = editPointType === EDIT_TYPE.CREATING;
+  const isCreating = editPointMode === MODE.CREATING;
 
   const currentDestination = destination !== null ? destinations.find((dest) => dest.id === destination) : DEFAULT_DESTINATION;
   const currentOffersByType = offersModel.getOffersByType(type);
@@ -66,14 +66,14 @@ export function createEditFormTemplate({ state, destinations, offersModel, editP
 
 
 function createButtonTemplate(isCreating, isActive, isDeleting) {
-  let text;
+  let buttonText;
   if (isCreating) {
-    text = EDIT_POINT_VIEW_BUTTON_TEXT.CANCEL;
+    buttonText = EDIT_POINT_VIEW_BUTTON_TEXT.CANCEL;
   }
   else {
-    text = isDeleting ? EDIT_POINT_VIEW_BUTTON_TEXT.LOAD_DELETE : EDIT_POINT_VIEW_BUTTON_TEXT.DELETE;
+    buttonText = isDeleting ? EDIT_POINT_VIEW_BUTTON_TEXT.LOAD_DELETE : EDIT_POINT_VIEW_BUTTON_TEXT.DELETE;
   }
-  return `<button class="event__reset-btn" type="reset" ${isActive ? '' : 'disabled'}>${text}</button>`;
+  return `<button class="event__reset-btn" type="reset" ${isActive ? '' : 'disabled'}>${buttonText}</button>`;
 }
 
 
@@ -103,7 +103,7 @@ function createEventTypesList(currentType, pointId, isActive) {
                       <fieldset class="event__type-group">
                         <legend class="visually-hidden">Event type</legend>
 
-                        ${POINT_TYPES.reduce((acc, type) => (`${acc}
+                        ${ROUTE_POINT_TYPES.reduce((acc, type) => (`${acc}
                         <div class="event__type-item">
                           <input id="event-type-${type.toLowerCase()}-${pointId}" class="event__type-input  visually-hidden"
                            type="radio" name="event-type" value="${type.toLowerCase()}" ${type.toLowerCase() === currentType ? 'checked' : ''} ${isActive ? '' : 'disabled'}>
@@ -122,15 +122,16 @@ function createDestinationList(destinations, id) {
 }
 
 function createOffersList(offers, selectedOffers, isActive) {
-  if(offers.length === 0) {
-    return '';}
+  if (offers.length === 0) {
+    return '';
+  }
 
   const offerItems = offers.map((offer) => {
     const slug = offer.title.split(' ').at(-1);
     return (`<div class="event__offer-selector">
                 <input class="event__offer-checkbox  visually-hidden" type="checkbox" name="event-offer-${slug}"
                 id="event-offer-${slug}-${offer.id}"
-                ${selectedOffers?.includes(offer.id) ? 'checked' : '' }
+                ${selectedOffers?.includes(offer.id) ? 'checked' : ''}
                 ${isActive ? '' : 'disabled'}>
                 <label class="event__offer-label" for="event-offer-${slug}-${offer.id}">
                     <span class="event__offer-title">${offer.title}</span>

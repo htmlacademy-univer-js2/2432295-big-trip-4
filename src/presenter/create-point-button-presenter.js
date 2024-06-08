@@ -9,8 +9,8 @@ export default class CreateRoutePointButtonPresenter {
     this.#container = container;
   }
 
-  init = ({ onNewPointButtonClick }) => {
-    this.#createRoutePointButton = new CreateRoutePointButtonView({ onNewPointButtonClick });
+  init = ({ onNewRoutePointButtonClick }) => {
+    this.#createRoutePointButton = new CreateRoutePointButtonView({ onNewRoutePointButtonClick });
     render(this.#createRoutePointButton, this.#container);
   };
 

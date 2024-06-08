@@ -1,6 +1,6 @@
 import { RenderPosition, render, remove } from '../framework/render';
 import { USER_ACTION, UPDATE_TYPE, MODE } from '../const';
-import NewEditFormView from '../view/edit-form-view';
+import EditFormView from '../view/edit-form-view';
 
 export default class CreateRoutePointPresenter {
   #container = null;
@@ -12,11 +12,9 @@ export default class CreateRoutePointPresenter {
   #handleDataChange = null;
   #handleDestroy = null;
 
-  #createRoutePointButton = null; // createRoutePointButton
+  #createRoutePointButton = null;
 
-  #mode = null;
-
-  constructor ({container, destinationsModel, offersModel, createRoutePointButton, onDataChange, onDestroy}) {
+  constructor({ container, destinationsModel, offersModel, createRoutePointButton, onDataChange, onDestroy }) {
     this.#container = container;
 
     this.#destinationsModel = destinationsModel;
@@ -24,27 +22,25 @@ export default class CreateRoutePointPresenter {
 
     this.#createRoutePointButton = createRoutePointButton;
 
-    this.#mode = MODE.CREATING;
-
     this.#handleDataChange = onDataChange;
     this.#handleDestroy = onDestroy;
   }
 
+
   init() {
     if (!this.#createRoutePointComponent) {
-      this.#createRoutePointComponent = new NewEditFormView({
+      this.#createRoutePointComponent = new EditFormView({
         offersModel: this.#offersModel,
         destinations: this.#destinationsModel.destinations,
-        editPointType: MODE.CREATING,
+        editPointMode: MODE.CREATING,
 
-        onEditFormResetClick: this.#handleFormClose,
-        onEditFormSubmitClick : this.#handleEditFormSubmit
+        onEditFormResetClick: this.#handleEditFormClose,
+        onEditFormSubmitClick: this.#handleEditFormSubmit
       });
     }
 
     render(this.#createRoutePointComponent, this.#container, RenderPosition.AFTERBEGIN);
     document.addEventListener('keydown', this.#handleEscKeyDown);
-
   }
 
 
@@ -55,19 +51,19 @@ export default class CreateRoutePointPresenter {
     });
   }
 
-  setAborting () {
-    const resetFormState = () => {
+  setAborting() {
+    const resetEditFormState = () => {
       this.#createRoutePointComponent.updateElement({
         isActive: true,
         isSaving: false,
         isDeleting: false
       });
     };
-    this.#createRoutePointComponent.shake(resetFormState);
+    this.#createRoutePointComponent.shake(resetEditFormState);
   }
 
 
-  #handleFormClose = () => {
+  #handleEditFormClose = () => {
     this.#createRoutePointButton.disableButton();
     this.destroy();
   };
@@ -92,7 +88,7 @@ export default class CreateRoutePointPresenter {
   };
 
 
-  destroy = ({isCanceled = true} = {}) => {
+  destroy = ({ isCanceled = true } = {}) => {
     if (!this.#createRoutePointComponent) {
       return;
     }
@@ -101,6 +97,6 @@ export default class CreateRoutePointPresenter {
     this.#createRoutePointComponent = null;
     document.removeEventListener('keydown', this.#handleEscKeyDown);
 
-    this.#handleDestroy({isCanceled});
+    this.#handleDestroy({ isCanceled });
   };
 }

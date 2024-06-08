@@ -1,9 +1,9 @@
 import { render, replace, remove } from '../framework/render';
-import { MODE, UPDATE_TYPE, USER_ACTION, EDIT_TYPE } from '../const'; // caps
+import { MODE, UPDATE_TYPE, USER_ACTION } from '../const';
 import { isMinorUpdate } from '../utils';
 
-import NewRoutePointView from '../view/route-point-view.js';
-import NewEditFormView from '../view/edit-form-view.js';
+import RoutePointView from '../view/route-point-view.js';
+import EditFormView from '../view/edit-form-view.js';
 
 export default class RoutePointPresenter {
   constructor({ container, offersModel, destinationsModel, onDataChange, onModeChange }) {
@@ -18,8 +18,6 @@ export default class RoutePointPresenter {
   #container = null;
   #routePoint = null;
 
-  #currentMode = MODE.DEFAULT;
-
   #offersModel = null;
   #destinationsModel = null;
 
@@ -29,31 +27,34 @@ export default class RoutePointPresenter {
   #handleDataChange = null;
   #handleModeChange = null;
 
+  #currentMode = MODE.DEFAULT;
+
+
   init(routePoint) {
     this.#routePoint = routePoint;
 
     const prevPointComponent = this.#routePointComponent;
     const prevEditFormComponent = this.#editRoutePointComponent;
 
-    this.#routePointComponent = new NewRoutePointView({
+    this.#routePointComponent = new RoutePointView({
       routePoint: this.#routePoint,
       offers: this.#offersModel.getOffersByType(this.#routePoint.type),
       destination: this.#destinationsModel.getDestinationById(this.#routePoint.destination),
 
-      onEditClick: this.#onEditFormClick,
-      onFavoriteClick: this.#onFavoriteClick
+      onEditClick: this.#handleEditFormClick,
+      onFavoriteClick: this.#handleFavoriteClick
     });
 
-    this.#editRoutePointComponent = new NewEditFormView({
+    this.#editRoutePointComponent = new EditFormView({
       routePoint: this.#routePoint,
       offersModel: this.#offersModel,
       destinations: this.#destinationsModel.destinations,
 
-      onEditFormResetClick: this.#onEditFormReset,
-      onEditFormSubmitClick: this.#onEditFormSubmit,
-      onEditFormDeleteClick: this.#onEditFormDelete, //
+      onEditFormResetClick: this.#handleEditFormReset,
+      onEditFormSubmitClick: this.#handleEditFormSubmit,
+      onEditFormDeleteClick: this.#handleEditFormDelete,
 
-      editPointType: EDIT_TYPE.EDITING, //
+      editPointMode: MODE.EDITING,
     });
 
     if (prevPointComponent === null || prevEditFormComponent === null) {
@@ -78,21 +79,21 @@ export default class RoutePointPresenter {
   }
 
 
-  #onEditFormClick = () => {
+  #handleEditFormClick = () => {
     this.#replacePointToForm();
   };
 
-  #onFavoriteClick = () => {
+  #handleFavoriteClick = () => {
     this.#handleDataChange(
-      USER_ACTION.UPDATE_POINT, //
-      UPDATE_TYPE.MINOR, //
+      USER_ACTION.UPDATE_POINT,
+      UPDATE_TYPE.MINOR,
       {
         ...this.#routePoint,
         isFavorite: !this.#routePoint.isFavorite,
       });
   };
 
-  #onEditFormSubmit = (updatePoint) => {
+  #handleEditFormSubmit = (updatePoint) => {
     this.#handleDataChange(
       USER_ACTION.UPDATE_POINT,
       isMinorUpdate(updatePoint, this.#routePoint) ? UPDATE_TYPE.MINOR : UPDATE_TYPE.PATCH,
@@ -103,18 +104,18 @@ export default class RoutePointPresenter {
     }
   };
 
-  #onEditFormReset = () => {
+  #handleEditFormReset = () => {
     if (this.#editRoutePointComponent._state.isActive) {
       this.#editRoutePointComponent.reset(this.#routePoint);
 
       this.#replaceEditToPoint();
       document.removeEventListener('keydown', this.#escKeyHandler);
 
-      this.#currentMode = EDIT_TYPE.DEFAULT;
+      this.#currentMode = MODE.DEFAULT;
     }
   };
 
-  #onEditFormDelete = (routePoint) => { // handleDeleteClick
+  #handleEditFormDelete = (routePoint) => {
     this.#handleDataChange(
       USER_ACTION.DELETE_POINT,
       UPDATE_TYPE.MINOR,
@@ -137,6 +138,7 @@ export default class RoutePointPresenter {
     if (this.#editRoutePointComponent._state.isActive) {
       this.#editRoutePointComponent.reset(this.#routePoint);
       replace(this.#routePointComponent, this.#editRoutePointComponent);
+
       document.removeEventListener('keydown', this.#escKeyHandler);
       this.#currentMode = MODE.DEFAULT;
     }
@@ -185,14 +187,14 @@ export default class RoutePointPresenter {
 
   setAborting() {
     if (this.#currentMode === MODE.EDITING) {
-      const resetFormState = () => {
+      const resetEditFormState = () => {
         this.#editRoutePointComponent.updateElement({
           isActive: true,
           isSaving: false,
           isDeleting: false
         });
       };
-      this.#editRoutePointComponent.shake(resetFormState);
+      this.#editRoutePointComponent.shake(resetEditFormState);
     } else {
       this.#routePointComponent.shake();
     }

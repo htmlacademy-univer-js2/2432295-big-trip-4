@@ -1,9 +1,6 @@
-//import { generateDestinations } from '../mocks/destinations';
-
 export default class DestinationsModel {
   constructor(apiService) {
     this.#apiService = apiService;
-    //this.#destinations = generateDestinations();
   }
 
   #destinations = null;

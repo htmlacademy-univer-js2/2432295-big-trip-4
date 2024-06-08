@@ -1,4 +1,4 @@
-import { RenderPosition, render, remove, replace } from '../framework/render.js';
+import { RenderPosition, render, remove } from '../framework/render.js';
 import UiBlocker from '../framework/ui-blocker/ui-blocker';
 
 import { SORT_TYPE, FILTER_TYPE, FILTER_OPTIONS, UPDATE_TYPE, USER_ACTION, TIME_LIMIT } from '../const.js';
@@ -8,13 +8,14 @@ import SortPresenter from './sort-presenter.js';
 import RoutePointPresenter from './route-point-presenter';
 import CreateRoutePointPresenter from './create-point-presenter.js';
 
-import NewRoutePointsView from '../view/route-points-list-view.js';
-import NewEmptyRoutePointsView from '../view/empty-route-point-list-view.js';
-import NewTripInfoView from '../view/trip-info-view.js';
+import RoutePointsListView from '../view/route-points-list-view.js';
+import EmptyRoutePointsView from '../view/empty-route-point-list-view.js';
+import TripInfoView from '../view/trip-info-view.js';
 
 
 export default class Presenter {
-  constructor({ container, pointsModel, offersModel, destinationsModel, filterModel, createRoutePointButtonPresenter }) {
+  constructor({ container, pointsModel, offersModel, destinationsModel, filterModel,
+    createRoutePointButtonPresenter }) {
     this.#container = container;
 
     this.#pointsModel = pointsModel;
@@ -29,6 +30,7 @@ export default class Presenter {
   }
 
   #container = null;
+
   #pointsModel = null;
   #offersModel = null;
   #filterModel = null;
@@ -39,12 +41,12 @@ export default class Presenter {
   #sortPresenter = null;
   #routePointPresenters = new Map();
 
-  #routePointsComponent = new NewRoutePointsView();
-  #emptyPointListComponent = null;
+  #routePointsListComponent = new RoutePointsListView();
+  #emptyRoutePointsListComponent = null;
   #tripInfoComponent = null;
 
   #currentSortType = SORT_TYPE.DAY;
-  #isCreatingModeNow = false;
+  #isCreatingMode = false;
 
   #isLoading = true;
   #isLoadingError = false;
@@ -71,78 +73,57 @@ export default class Presenter {
 
   #renderTrip() {
     if (this.#isLoading) {
-      this.#renderEmptyList({isLoading: true});
+      this.#renderEmptyRoutePointsList({ isLoading: true });
       return;
     }
 
     if (this.#isLoadingError) {
-      this.#renderEmptyList({isLoadingError: true});
+      this.#renderEmptyRoutePointsList({ isLoadingError: true });
       return;
     }
 
-    if (!this.routePoints.length && !this.#isCreatingModeNow) {
-      this.#renderEmptyList();
+    if (!this.routePoints.length && !this.#isCreatingMode) {
+      this.#renderEmptyRoutePointsList();
       return;
     }
 
     this.#renderTripInfo();
     this.#renderSort();
-    this.#renderRoutePointList();
+    this.#renderRoutePointsList();
     this.#renderRoutePoints();
   }
 
-  #renderTripInfo() { //
-    const points = this.#pointsModel.routePoints;
+  #renderTripInfo() {
+    const routePoints = this.#pointsModel.routePoints;
     const destinations = this.#destinationsModel.destinations;
     const offers = this.#offersModel.offers;
 
-    this.#tripInfoComponent = new NewTripInfoView(points, destinations, offers);
+    this.#tripInfoComponent = new TripInfoView(routePoints, destinations, offers);
 
     render(this.#tripInfoComponent, this.#container.TRIP_INFO, RenderPosition.AFTERBEGIN);
   }
-  /*#renderTripInfo = () => {
-    const prevNewTripInfoComponent = this.#tripInfoComponent;
-
-    const points = this.#pointsModel.routePoints;
-    const destinations = this.#destinationsModel.destinations;
-    const offers = this.#offersModel.offers;
-
-    this.#tripInfoComponent = new NewTripInfoView(points, destinations, offers);
-
-    //this.#tripInfoComponent = new NewTripInfoView(this.routePoints, this.#destinationsModel.destinations, this.#offersModel.offers);
-
-    if (!prevNewTripInfoComponent) {
-      render(this.#tripInfoComponent, this.#container.TRIP_INFO, RenderPosition.AFTERBEGIN);
-      return;
-    }
-
-    replace(this.#tripInfoComponent, prevNewTripInfoComponent);
-    remove(prevNewTripInfoComponent);
-    console.log(this.#tripInfoComponent.element);
-  };*/
-
 
   #renderSort() {
     this.#sortPresenter = new SortPresenter({
       container: this.#container.EVENTS,
+      currentSortType: this.#currentSortType,
       onSortTypeChange: this.#handleSortTypeChange,
-      currentSortType: this.#currentSortType
     });
 
     this.#sortPresenter.init();
   }
 
-  #renderRoutePointList() {
-    render(this.#routePointsComponent, this.#container.EVENTS);
+  #renderRoutePointsList() {
+    render(this.#routePointsListComponent, this.#container.EVENTS);
   }
 
-  #renderEmptyList = ({isLoading = false, isLoadingError = false} = {}) => {
-    this.#emptyPointListComponent = new NewEmptyRoutePointsView({
-      currentFilterType : this.#filterModel.getFilter(),
+  #renderEmptyRoutePointsList = ({ isLoading = false, isLoadingError = false } = {}) => {
+    this.#emptyRoutePointsListComponent = new EmptyRoutePointsView({
+      currentFilterType: this.#filterModel.getFilter(),
       isLoading,
       isLoadingError
     });
-    render(this.#emptyPointListComponent, this.#container.EVENTS);
+    render(this.#emptyRoutePointsListComponent, this.#container.EVENTS);
   };
 
   #renderRoutePoints() {
@@ -151,7 +132,7 @@ export default class Presenter {
 
   #renderRoutePoint = (routePoint) => {
     const routePointPresenter = new RoutePointPresenter({
-      container: this.#routePointsComponent.element,
+      container: this.#routePointsListComponent.element,
       offersModel: this.#offersModel,
       destinationsModel: this.#destinationsModel,
 
@@ -159,9 +140,9 @@ export default class Presenter {
       onModeChange: this.#handleModeChange
     });
 
-    if(this.#emptyPointListComponent){
-      remove(this.#emptyPointListComponent);
-      this.#renderRoutePointList();
+    if (this.#emptyRoutePointsListComponent) {
+      remove(this.#emptyRoutePointsListComponent);
+      this.#renderRoutePointsList();
     }
 
     routePointPresenter.init(routePoint);
@@ -173,20 +154,19 @@ export default class Presenter {
     if (this.#currentSortType === sortType) {
       return;
     }
-
     this.#currentSortType = sortType;
+
     this.#clearRoutePoints();
     this.#renderRoutePoints();
   };
 
   #handleModeChange = () => {
-    if (this.#createRoutePointPresenter !== null){
+    if (this.#createRoutePointPresenter !== null) {
       this.#createRoutePointPresenter.destroy();
     }
 
     this.#routePointPresenters.forEach((routePointPresenter) => routePointPresenter.initialStateView());
   };
-
 
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
@@ -216,11 +196,11 @@ export default class Presenter {
   #handleViewAction = async (actionType, updateType, update) => {
     this.#uiBlocker.block();
 
-    switch(actionType) {
+    switch (actionType) {
       case USER_ACTION.UPDATE_POINT:
         this.#routePointPresenters.get(update.id).setSaving();
         try {
-          await this.#pointsModel.updateRoutePoints(updateType, update);
+          await this.#pointsModel.updateRoutePoint(updateType, update);
         } catch (err) {
           this.#routePointPresenters.get(update.id).setAborting();
         }
@@ -229,7 +209,7 @@ export default class Presenter {
       case USER_ACTION.ADD_POINT:
         this.#createRoutePointPresenter.setSaving();
         try {
-          await this.#pointsModel.addRoutePoints(updateType, update);
+          await this.#pointsModel.addRoutePoint(updateType, update);
         } catch (err) {
           this.#createRoutePointPresenter.setAborting();
         }
@@ -238,7 +218,7 @@ export default class Presenter {
       case USER_ACTION.DELETE_POINT:
         this.#routePointPresenters.get(update.id).setDeleting();
         try {
-          await this.#pointsModel.deleteRoutePoints(updateType, update);
+          await this.#pointsModel.deleteRoutePoint(updateType, update);
         } catch (err) {
           this.#routePointPresenters.get(update.id).setAborting();
         }
@@ -248,9 +228,8 @@ export default class Presenter {
     this.#uiBlocker.unblock();
   };
 
-
   #handleCreatePointButtonDestroy = ({ isCanceled }) => {
-    this.#isCreatingModeNow = false;
+    this.#isCreatingMode = false;
     this.#createRoutePointButtonPresenter.enableButton();
 
     if (!this.routePoints.length && isCanceled) {
@@ -259,9 +238,10 @@ export default class Presenter {
     }
   };
 
+
   createRoutePointButtonClickHandler = () => {
     this.#createRoutePointPresenter = new CreateRoutePointPresenter({
-      container: this.#routePointsComponent.element,
+      container: this.#routePointsListComponent.element,
       destinationsModel: this.#destinationsModel,
       offersModel: this.#offersModel,
       createRoutePointButton: this.#createRoutePointButtonPresenter,
@@ -269,12 +249,12 @@ export default class Presenter {
       onDestroy: this.#handleCreatePointButtonDestroy,
     });
 
-    if(this.#emptyPointListComponent){ //
-      remove(this.#emptyPointListComponent);
-      render(this.#emptyPointListComponent, this.#container.EVENTS);
+    if (this.#emptyRoutePointsListComponent) {
+      remove(this.#emptyRoutePointsListComponent);
+      render(this.#emptyRoutePointsListComponent, this.#container.EVENTS);
     }
 
-    this.#isCreatingModeNow = true;
+    this.#isCreatingMode = true;
     this.#currentSortType = SORT_TYPE.DAY;
     this.#filterModel.set(UPDATE_TYPE.MAJOR, FILTER_TYPE.EVERYTHING);
 
@@ -295,7 +275,7 @@ export default class Presenter {
     this.#createRoutePointPresenter?.destroy();
     this.#routePointPresenters.forEach((presenter) => presenter.destroy());
     this.#routePointPresenters.clear();
-    remove(this.#emptyPointListComponent);
+    remove(this.#emptyRoutePointsListComponent);
     remove(this.#tripInfoComponent);
 
     if (sortTypeReset) {

@@ -1,6 +1,6 @@
-import {WARNING_MESSAGE} from '../const';
+import { WARNING_MESSAGE } from '../const';
 
-export function createEmptyPointListTemplate(currentFilterType) {
+export function createEmptyRoutePointsListTemplate(currentFilterType) {
   return (
     `<p class="trip-events__msg">${WARNING_MESSAGE[currentFilterType]}</p>`
   );

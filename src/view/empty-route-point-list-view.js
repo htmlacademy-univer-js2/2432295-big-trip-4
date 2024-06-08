@@ -1,8 +1,8 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { createEmptyPointListTemplate } from '../template/empty-route-point-list-template.js';
+import { createEmptyRoutePointsListTemplate } from '../template/empty-route-point-list-template.js';
 
 
-export default class NewEmptyRoutePointsView extends AbstractView {
+export default class EmptyRoutePointsView extends AbstractView {
   constructor({ currentFilterType, isLoading = false, isLoadingError = false }) {
     super();
 
@@ -23,6 +23,6 @@ export default class NewEmptyRoutePointsView extends AbstractView {
       return '<p class="trip-events__msg">Failed to load latest route information</p>';
     }
 
-    return createEmptyPointListTemplate(this.#currentFilterType);
+    return createEmptyRoutePointsListTemplate(this.#currentFilterType);
   }
 }

@@ -1,13 +1,12 @@
 import Observable from '../framework/observable';
-import { adaptToClient, adaptToServer, updatePoints } from '../utils';
+import { adaptToClient, adaptToServer, updateRoutePoints } from '../utils';
 import { UPDATE_TYPE } from '../const';
-//import { ROUTE_POINTS_COUNT } from '../const';
-//import { getRandomRoutePoint } from '../mocks/route-point';
+
 
 export default class PointsModel extends Observable {
-  constructor({pointsApiService, destinationsModel, offersModel}) {
+  constructor({ tripApiService, destinationsModel, offersModel }) {
     super();
-    this.#pointsApiService = pointsApiService;
+    this.#tripApiService = tripApiService;
     this.#destinationsModel = destinationsModel;
     this.#offersModel = offersModel;
   }
@@ -15,7 +14,7 @@ export default class PointsModel extends Observable {
   #routePoints = [];
   #destinationsModel = null;
   #offersModel = null;
-  #pointsApiService = null;
+  #tripApiService = null;
 
   get routePoints() {
     return this.#routePoints;
@@ -27,44 +26,44 @@ export default class PointsModel extends Observable {
         this.#destinationsModel.init(),
         this.#offersModel.init()
       ]);
-      const points = await this.#pointsApiService.points;
-      this.#routePoints = points.map(adaptToClient);
+      const routePoints = await this.#tripApiService.points;
+      this.#routePoints = routePoints.map(adaptToClient);
       this._notify(UPDATE_TYPE.INIT, {});
     } catch (err) {
       this.#routePoints = [];
-      this._notify(UPDATE_TYPE.INIT, {isError: true});
+      this._notify(UPDATE_TYPE.INIT, { isError: true });
     }
   }
 
-  async updateRoutePoints(updateType, update) {
+  async updateRoutePoint(updateType, update) {
     const insertionIndex = this.#routePoints.findIndex((routePoint) => routePoint.id === update.id);
 
     if (insertionIndex === -1) {
-      throw new Error('Can\'t update non-existing point');
+      throw new Error('Can\'t update non-existing routePoint');
     }
 
     try {
-      const response = await this.#pointsApiService.updatePoint(adaptToServer(update));
-      const updatedPoint = adaptToClient(response);
-      this.#routePoints = updatePoints(this.#routePoints, updatedPoint);
-      this._notify(updateType, updatedPoint);
+      const response = await this.#tripApiService.updatePoint(adaptToServer(update));
+      const updatedRoutePoint = adaptToClient(response);
+      this.#routePoints = updateRoutePoints(this.#routePoints, updatedRoutePoint);
+      this._notify(updateType, updatedRoutePoint);
     } catch (err) {
-      throw new Error('Can\'t update point');
+      throw new Error('Can\'t update routePoint');
     }
   }
 
-  async addRoutePoints(updateType, update) {
+  async addRoutePoint(updateType, update) {
     try {
-      const response = await this.#pointsApiService.addPoint(adaptToServer(update, true));
-      const newPoint = adaptToClient(response);
-      this.#routePoints.push(newPoint);
-      this._notify(updateType, newPoint);
+      const response = await this.#tripApiService.addPoint(adaptToServer(update, true));
+      const newRoutePoint = adaptToClient(response);
+      this.#routePoints.push(newRoutePoint);
+      this._notify(updateType, newRoutePoint);
     } catch (err) {
       throw new Error('Can\'t add point');
     }
   }
 
-  async deleteRoutePoints(updateType, update) {
+  async deleteRoutePoint(updateType, update) {
     const insertionIndex = this.#routePoints.findIndex((routePoint) => routePoint.id === update.id);
 
     if (insertionIndex === -1) {
@@ -72,8 +71,8 @@ export default class PointsModel extends Observable {
     }
 
     try {
-      await this.#pointsApiService.deletePoint(update.id);
-      this.#routePoints = this.#routePoints.filter((item) => item.id !== update.id);
+      await this.#tripApiService.deletePoint(update.id);
+      this.#routePoints = this.#routePoints.filter((routePoint) => routePoint.id !== update.id);
       this._notify(updateType);
     } catch (err) {
       throw new Error('Can\'t delete point');

@@ -1,39 +1,41 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import { DATE_FORMAT, DATE_PERIODS,
-  SORT_TYPE, SORT_OPTIONS } from './const';
+import {
+  DATE_FORMAT, DATE_PERIODS,
+  SORT_TYPE, SORT_OPTIONS
+} from './const';
 
 dayjs.extend(duration);
 
 
 function humanizeDate(dueDate, format = DATE_FORMAT) {
-  if (dueDate === null){
+  if (dueDate === null) {
     return '';
   }
   return dueDate ? dayjs(dueDate).format(format) : '';
 }
 
 function getDateDuration(dateFrom, dateTo) {
-  const difference = dayjs(dateTo).diff(dayjs(dateFrom));
-
-  let timeDifference = 0;
+  const datesDifference = dayjs(dateTo).diff(dayjs(dateFrom));
   const days = dayjs(dateTo).diff(dayjs(dateFrom), 'days');
+
+  let durationTime = 0;
   switch (true) {
-    case difference >= DATE_PERIODS.MSEC_IN_DAY * 100:
-      timeDifference = dayjs.duration(difference).format(`${days}[D] HH[H] mm[M]`);
+    case datesDifference >= DATE_PERIODS.MSEC_IN_DAY * 100:
+      durationTime = dayjs.duration(datesDifference).format(`${days}[D] HH[H] mm[M]`);
       break;
-    case difference >= DATE_PERIODS.MSEC_IN_DAY:
-      timeDifference = dayjs.duration(difference).format('DD[D] HH[H] mm[M]');
+    case datesDifference >= DATE_PERIODS.MSEC_IN_DAY:
+      durationTime = dayjs.duration(datesDifference).format('DD[D] HH[H] mm[M]');
       break;
-    case difference >= DATE_PERIODS.MSEC_IN_HOUR:
-      timeDifference = dayjs.duration(difference).format('HH[H] mm[M]');
+    case datesDifference >= DATE_PERIODS.MSEC_IN_HOUR:
+      durationTime = dayjs.duration(datesDifference).format('HH[H] mm[M]');
       break;
-    case difference < DATE_PERIODS.MSEC_IN_HOUR:
-      timeDifference = dayjs.duration(difference).format('mm[M]');
+    case datesDifference < DATE_PERIODS.MSEC_IN_HOUR:
+      durationTime = dayjs.duration(datesDifference).format('mm[M]');
       break;
   }
 
-  return timeDifference;
+  return durationTime;
 }
 
 const isFutureDate = (dateFrom) => dayjs(dateFrom).isAfter(dayjs());
@@ -44,39 +46,39 @@ const isPresentDate = (dateFrom, dateTo) => {
 };
 
 
-const getRoutePointsDayDiff = (firstPoint, secondPoint) => dayjs(firstPoint.dateFrom).diff(dayjs(secondPoint.dateFrom));
-const getRoutePointsEventDiff = (firstPoint, secondPoint) => firstPoint.type.localeCompare(secondPoint.type);
-const getRoutePointsPriceDiff = (firstPoint, secondPoint) => secondPoint.basePrice - firstPoint.basePrice;
-const getRoutePointsDurationDiff = (firstPoint, secondPoint) => dayjs(secondPoint.dateTo).diff(dayjs(secondPoint.dateFrom))
-- dayjs(firstPoint.dateTo).diff(dayjs(firstPoint.dateFrom));
-const getRoutePointsOfferDiff = (firstPoint, secondPoint) => firstPoint.offers.length - secondPoint.offers.length;
+const getRoutePointsDayDifference = (firstRoutePoint, secondRoutePoint) => dayjs(firstRoutePoint.dateFrom).diff(dayjs(secondRoutePoint.dateFrom));
+const getRoutePointsEventDifference = (firstRoutePoint, secondRoutePoint) => firstRoutePoint.type.localeCompare(secondRoutePoint.type);
+const getRoutePointsPriceDifference = (firstRoutePoint, secondRoutePoint) => secondRoutePoint.basePrice - firstRoutePoint.basePrice;
+const getRoutePointsDurationDifference = (firstRoutePoint, secondRoutePoint) => dayjs(secondRoutePoint.dateTo).diff(dayjs(secondRoutePoint.dateFrom))
+  - dayjs(firstRoutePoint.dateTo).diff(dayjs(firstRoutePoint.dateFrom));
+const getRoutePointsOfferDifference = (firstRoutePoint, secondRoutePoint) => firstRoutePoint.offers.length - secondRoutePoint.offers.length;
 
 
 const sortRoutePoints = (routePoints, sortType = SORT_TYPE.DAY) => SORT_OPTIONS[sortType](routePoints);
 
 
-function updatePoints(points, update) { //
-  return points.map((point) => point.id === update.id ? update : point);
+function updateRoutePoints(routePoints, update) {
+  return routePoints.map((routePoint) => routePoint.id === update.id ? update : routePoint);
 }
 
 
-const isMinorUpdate = (firstPoint, secondPoint) => {
-  const firstPointDuration = dayjs(firstPoint.dateTo).diff(dayjs(firstPoint.dateFrom));
-  const secondPointDuration = dayjs(secondPoint.dateTo).diff(dayjs(secondPoint.dateFrom));
+const isMinorUpdate = (firstRoutePoint, secondRoutePoint) => {
+  const firstPointDuration = dayjs(firstRoutePoint.dateTo).diff(dayjs(firstRoutePoint.dateFrom));
+  const secondPointDuration = dayjs(secondRoutePoint.dateTo).diff(dayjs(secondRoutePoint.dateFrom));
 
-  return firstPoint.dateFrom !== secondPoint.dateFrom
-  || firstPoint.basePrice !== secondPoint.basePrice
-  || firstPointDuration !== secondPointDuration;
+  return firstRoutePoint.dateFrom !== secondRoutePoint.dateFrom
+    || firstRoutePoint.basePrice !== secondRoutePoint.basePrice
+    || firstPointDuration !== secondPointDuration;
 };
 
 
-function adaptToServer(point, isAddition = false) { // isAddition = false
+function adaptToServer(routePoint, isAddition = false) {
   const adaptedPoint = {
-    ...point,
-    ['base_price']: point.basePrice,
-    ['date_from']: point.dateFrom instanceof Date ? point.dateFrom.toISOString() : null,
-    ['date_to']: point.dateTo instanceof Date ? point.dateTo.toISOString() : null,
-    ['is_favorite']: point.isFavorite
+    ...routePoint,
+    ['base_price']: routePoint.basePrice,
+    ['date_from']: routePoint.dateFrom instanceof Date ? routePoint.dateFrom.toISOString() : null,
+    ['date_to']: routePoint.dateTo instanceof Date ? routePoint.dateTo.toISOString() : null,
+    ['is_favorite']: routePoint.isFavorite
   };
 
   delete adaptedPoint.basePrice;
@@ -90,19 +92,20 @@ function adaptToServer(point, isAddition = false) { // isAddition = false
   return adaptedPoint;
 }
 
-function adaptToClient(point) {
+function adaptToClient(routePoint) {
   const adaptedPoint = {
-    ...point,
-    basePrice: point['base_price'],
-    dateFrom: point['date_from'] !== null ? new Date(point['date_from']) : point['date_from'],
-    dateTo: point['date_to'] !== null ? new Date(point['date_to']) : point['date_to'],
-    isFavorite: point['is_favorite']
+    ...routePoint,
+    basePrice: routePoint['base_price'],
+    dateFrom: routePoint['date_from'] !== null ? new Date(routePoint['date_from']) : routePoint['date_from'],
+    dateTo: routePoint['date_to'] !== null ? new Date(routePoint['date_to']) : routePoint['date_to'],
+    isFavorite: routePoint['is_favorite']
   };
 
   delete adaptedPoint['base_price'];
   delete adaptedPoint['date_from'];
   delete adaptedPoint['date_to'];
   delete adaptedPoint['is_favorite'];
+
   return adaptedPoint;
 }
 
@@ -114,7 +117,7 @@ function getOffersCost(offersId = [], offers = []) {
   );
 }
 
-function getTripCost(routePoints = [], offers = []) { //
+function getTripCost(routePoints = [], offers = []) {
   return routePoints.reduce(
     (result, routePoint) =>
       result + routePoint.basePrice + getOffersCost(routePoint.offers, offers.find((offer) => routePoint.type === offer.type)?.offers),
@@ -122,15 +125,15 @@ function getTripCost(routePoints = [], offers = []) { //
 }
 
 
-function getTripInfoTitle(cities) { //
-  if (cities.length > 3) {
-    return `${cities[0]} &mdash; ... &mdash; ${cities[cities.length - 1]}`;
+function getTripInfoTitle(destinations) {
+  if (destinations.length > 3) {
+    return `${destinations[0]} &mdash; ... &mdash; ${destinations[destinations.length - 1]}`;
   } else {
-    return cities.reduce((acc, city, index) => {
-      if (index !== cities.length - 1) {
-        acc += `${city} &mdash; `;
+    return destinations.reduce((acc, destination, index) => {
+      if (index !== destinations.length - 1) {
+        acc += `${destination} &mdash; `;
       } else {
-        acc += `${city}`;
+        acc += `${destination}`;
       }
       return acc;
     }, '');
@@ -142,7 +145,7 @@ function getTripInfoStartDate(routePoints) {
 }
 
 function getTripInfoEndDate(routePoints) {
-  if (!routePoints[0]){
+  if (!routePoints[0]) {
     return '';
   }
 
@@ -157,13 +160,14 @@ function getTripInfoEndDate(routePoints) {
 }
 
 
-export { humanizeDate, getDateDuration,
-  isFutureDate, isPastDate, isPresentDate,
-  getRoutePointsDayDiff, getRoutePointsEventDiff, getRoutePointsPriceDiff, getRoutePointsDurationDiff, getRoutePointsOfferDiff,
+export {
+  humanizeDate, getDateDuration, isFutureDate, isPastDate, isPresentDate,
+  getRoutePointsDayDifference, getRoutePointsEventDifference, getRoutePointsPriceDifference,
+  getRoutePointsDurationDifference, getRoutePointsOfferDifference,
+  getOffersCost, getTripCost,
+  getTripInfoTitle, getTripInfoStartDate, getTripInfoEndDate,
   sortRoutePoints,
-  updatePoints,
+  updateRoutePoints,
   isMinorUpdate,
   adaptToServer, adaptToClient,
-  getOffersCost, getTripCost,
-  getTripInfoTitle, getTripInfoStartDate, getTripInfoEndDate
 };

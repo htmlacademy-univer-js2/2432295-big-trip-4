@@ -4,11 +4,11 @@ import { FILTER_TYPE } from '../const.js';
 export default class FilterModel extends Observable {
   #currentFilter = FILTER_TYPE.EVERYTHING;
 
-  getFilter () {
+  getFilter() {
     return this.#currentFilter;
   }
 
-  set (updateType, filter) {
+  set(updateType, filter) {
     this.#currentFilter = filter;
     this._notify(updateType, filter);
   }
