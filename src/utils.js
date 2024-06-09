@@ -19,9 +19,10 @@ function getDateDuration(dateFrom, dateTo) {
   const datesDifference = dayjs(dateTo).diff(dayjs(dateFrom));
   const days = dayjs(dateTo).diff(dayjs(dateFrom), 'days');
 
+  const hundredDays = 100;
   let durationTime = 0;
   switch (true) {
-    case datesDifference >= DATE_PERIODS.MSEC_IN_DAY * 100:
+    case datesDifference >= DATE_PERIODS.MSEC_IN_DAY * hundredDays:
       durationTime = dayjs.duration(datesDifference).format(`${days}[D] HH[H] mm[M]`);
       break;
     case datesDifference >= DATE_PERIODS.MSEC_IN_DAY:
