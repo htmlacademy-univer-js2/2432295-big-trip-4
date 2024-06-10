@@ -69,15 +69,13 @@ export default class CreateRoutePointPresenter {
   };
 
   #handleEditFormSubmit = (routePoint) => {
-    if (routePoint.destination !== null) {
-      this.#createRoutePointButton.disableButton();
+    this.#createRoutePointButton.disableButton();
 
-      this.#handleDataChange(
-        USER_ACTION.ADD_POINT,
-        UPDATE_TYPE.MINOR,
-        routePoint
-      );
-    }
+    this.#handleDataChange(
+      USER_ACTION.ADD_POINT,
+      UPDATE_TYPE.MINOR,
+      routePoint
+    );
   };
 
   #handleEscKeyDown = (evt) => {

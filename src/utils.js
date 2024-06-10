@@ -19,9 +19,10 @@ function getDateDuration(dateFrom, dateTo) {
   const datesDifference = dayjs(dateTo).diff(dayjs(dateFrom));
   const days = dayjs(dateTo).diff(dayjs(dateFrom), 'days');
 
+  const hundredDays = 100;
   let durationTime = 0;
   switch (true) {
-    case datesDifference >= DATE_PERIODS.MSEC_IN_DAY * 100:
+    case datesDifference >= DATE_PERIODS.MSEC_IN_DAY * hundredDays:
       durationTime = dayjs.duration(datesDifference).format(`${days}[D] HH[H] mm[M]`);
       break;
     case datesDifference >= DATE_PERIODS.MSEC_IN_DAY:
@@ -72,7 +73,7 @@ const isMinorUpdate = (firstRoutePoint, secondRoutePoint) => {
 };
 
 
-function adaptToServer(routePoint, isAddition = false) {
+function adaptToServer(routePoint) {
   const adaptedPoint = {
     ...routePoint,
     ['base_price']: routePoint.basePrice,
@@ -85,9 +86,6 @@ function adaptToServer(routePoint, isAddition = false) {
   delete adaptedPoint.dateFrom;
   delete adaptedPoint.dateTo;
   delete adaptedPoint.isFavorite;
-  if (isAddition) {
-    delete adaptedPoint.id;
-  }
 
   return adaptedPoint;
 }

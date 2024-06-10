@@ -74,6 +74,7 @@ export default class Presenter {
   #renderTrip() {
     if (this.#isLoading) {
       this.#renderEmptyRoutePointsList({ isLoading: true });
+      this.#createRoutePointButtonPresenter.disableButton();
       return;
     }
 
@@ -82,12 +83,15 @@ export default class Presenter {
       return;
     }
 
+    this.#createRoutePointButtonPresenter.enableButton();
+
+    this.#renderTripInfo();
+
     if (!this.routePoints.length && !this.#isCreatingMode) {
       this.#renderEmptyRoutePointsList();
       return;
     }
 
-    this.#renderTripInfo();
     this.#renderSort();
     this.#renderRoutePointsList();
     this.#renderRoutePoints();

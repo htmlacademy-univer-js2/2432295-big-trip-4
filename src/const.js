@@ -4,19 +4,6 @@ import {
 } from './utils';
 
 
-const ROUTE_POINT_TYPES = [
-  'taxi',
-  'bus',
-  'train',
-  'ship',
-  'drive',
-  'flight',
-  'check-in',
-  'sightseeing',
-  'restaurant'
-];
-
-
 const DATE_FORMAT = 'D MMMM';
 const DATE_PERIODS = {
   HOURS_IN_DAY: 24,
@@ -39,7 +26,6 @@ const DEFAULT_DESTINATION = {
 };
 
 const POINT_EMPTY = {
-  id: crypto.randomUUID(),
   basePrice: 0,
   dateFrom: null,
   dateTo: null,
@@ -151,8 +137,7 @@ const API_METHODS = {
 
 
 export {
-  DATE_FORMAT, DATE_PERIODS,
-  ROUTE_POINT_TYPES, POINT_EMPTY,
+  DATE_FORMAT, DATE_PERIODS, POINT_EMPTY,
   FILTER_TYPE, FILTER_OPTIONS,
   SORT_TYPE, SORT_OPTIONS, ENABLED_SORT_TYPE,
   CONTAINER,

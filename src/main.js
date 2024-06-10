@@ -39,9 +39,8 @@ const filterPresenter = new FilterPresenter({
   filterModel
 });
 
-
-presenter.init();
 createRoutePointButtonPresenter.init({ onNewRoutePointButtonClick: presenter.createRoutePointButtonClickHandler });
+presenter.init();
 filterPresenter.init();
 
 pointsModel.init();

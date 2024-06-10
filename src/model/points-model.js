@@ -54,7 +54,7 @@ export default class PointsModel extends Observable {
 
   async addRoutePoint(updateType, update) {
     try {
-      const response = await this.#tripApiService.addPoint(adaptToServer(update, true));
+      const response = await this.#tripApiService.addPoint(adaptToServer(update));
       const newRoutePoint = adaptToClient(response);
       this.#routePoints.push(newRoutePoint);
       this._notify(updateType, newRoutePoint);

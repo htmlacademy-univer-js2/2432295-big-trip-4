@@ -1,4 +1,4 @@
-import { ROUTE_POINT_TYPES, MODE, DEFAULT_DESTINATION, EDIT_POINT_VIEW_BUTTON_TEXT } from '../const';
+import { MODE, DEFAULT_DESTINATION, EDIT_POINT_VIEW_BUTTON_TEXT } from '../const';
 import { humanizeDate } from '../utils';
 
 
@@ -10,13 +10,13 @@ export function createEditFormTemplate({ state, destinations, offersModel, editP
 
   const currentDestination = destination !== null ? destinations.find((dest) => dest.id === destination) : DEFAULT_DESTINATION;
   const currentOffersByType = offersModel.getOffersByType(type);
-
+  const allOffersByType = offersModel.offers;
 
   return (
     `<li class="trip-events__item">
               <form class="event event--edit" action="#" method="post">
                 <header class="event__header">
-                   ${createEventTypesList(type, id, isActive)}
+                   ${createEventTypesList(type, id, isActive, allOffersByType)}
 
                   <div class="event__field-group  event__field-group--destination">
                     <label class="event__label  event__type-output" for="event-destination-${id}">
@@ -91,7 +91,7 @@ function createDestinationTemplate(currentDestination) {
             </section>`);
 }
 
-function createEventTypesList(currentType, pointId, isActive) {
+function createEventTypesList(currentType, pointId, isActive, offersByType) {
   return (`<div class="event__type-wrapper">
                     <label class="event__type  event__type-btn" for="event-type-toggle-1">
                       <span class="visually-hidden">Choose event type</span>
@@ -103,12 +103,11 @@ function createEventTypesList(currentType, pointId, isActive) {
                       <fieldset class="event__type-group">
                         <legend class="visually-hidden">Event type</legend>
 
-                        ${ROUTE_POINT_TYPES.reduce((acc, type) => (`${acc}
-                        <div class="event__type-item">
+                        ${offersByType.map(({type}) => (`<div class="event__type-item">
                           <input id="event-type-${type.toLowerCase()}-${pointId}" class="event__type-input  visually-hidden"
                            type="radio" name="event-type" value="${type.toLowerCase()}" ${type.toLowerCase() === currentType ? 'checked' : ''} ${isActive ? '' : 'disabled'}>
                           <label class="event__type-label  event__type-label--${type.toLowerCase()}" for="event-type-${type.toLowerCase()}-${pointId}">${type}</label>
-                        </div>`), '')}
+                        </div>`)).join('')}
 
                       </fieldset>
                     </div>
