@@ -26,7 +26,6 @@ const DEFAULT_DESTINATION = {
 };
 
 const POINT_EMPTY = {
-  id: crypto.randomUUID(),
   basePrice: 0,
   dateFrom: null,
   dateTo: null,

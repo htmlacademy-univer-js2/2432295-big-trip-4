@@ -73,7 +73,7 @@ const isMinorUpdate = (firstRoutePoint, secondRoutePoint) => {
 };
 
 
-function adaptToServer(routePoint, isAddition = false) {
+function adaptToServer(routePoint) {
   const adaptedPoint = {
     ...routePoint,
     ['base_price']: routePoint.basePrice,
@@ -86,9 +86,6 @@ function adaptToServer(routePoint, isAddition = false) {
   delete adaptedPoint.dateFrom;
   delete adaptedPoint.dateTo;
   delete adaptedPoint.isFavorite;
-  if (isAddition) {
-    delete adaptedPoint.id;
-  }
 
   return adaptedPoint;
 }
