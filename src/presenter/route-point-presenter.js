@@ -109,8 +109,6 @@ export default class RoutePointPresenter {
       this.#editRoutePointComponent.reset(this.#routePoint);
 
       this.#replaceEditToPoint();
-      document.removeEventListener('keydown', this.#escKeyHandler);
-
       this.#currentMode = MODE.DEFAULT;
     }
   };
@@ -166,6 +164,7 @@ export default class RoutePointPresenter {
     remove(this.#routePointComponent);
     remove(this.#editRoutePointComponent);
     this.#editRoutePointComponent.removeElement();
+    document.removeEventListener('keydown', this.#escKeyHandler);
   }
 
 

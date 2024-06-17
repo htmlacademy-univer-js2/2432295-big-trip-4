@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view';
-import { createNewRoutePointButtonTemplate } from '../template/create-point-button-template';
+import { createRoutePointButtonTemplate } from '../template/create-route-point-button-template';
 
 export default class CreateRoutePointButtonView extends AbstractView {
   constructor({ onNewRoutePointButtonClick }) {
@@ -24,6 +24,6 @@ export default class CreateRoutePointButtonView extends AbstractView {
   };
 
   get template() {
-    return createNewRoutePointButtonTemplate();
+    return createRoutePointButtonTemplate();
   }
 }

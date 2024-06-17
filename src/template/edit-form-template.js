@@ -1,5 +1,5 @@
 import { MODE, DEFAULT_DESTINATION, EDIT_POINT_VIEW_BUTTON_TEXT } from '../const';
-import { humanizeDate } from '../utils';
+import { humanizeDate, capitalizeFirstLetter } from '../utils';
 
 
 export function createEditFormTemplate({ state, destinations, offersModel, editPointMode }) {
@@ -106,7 +106,7 @@ function createEventTypesList(currentType, pointId, isActive, offersByType) {
                         ${offersByType.map(({type}) => (`<div class="event__type-item">
                           <input id="event-type-${type.toLowerCase()}-${pointId}" class="event__type-input  visually-hidden"
                            type="radio" name="event-type" value="${type.toLowerCase()}" ${type.toLowerCase() === currentType ? 'checked' : ''} ${isActive ? '' : 'disabled'}>
-                          <label class="event__type-label  event__type-label--${type.toLowerCase()}" for="event-type-${type.toLowerCase()}-${pointId}">${type}</label>
+                          <label class="event__type-label  event__type-label--${type.toLowerCase()}" for="event-type-${type.toLowerCase()}-${pointId}">${capitalizeFirstLetter(type)}</label>
                         </div>`)).join('')}
 
                       </fieldset>

@@ -158,6 +158,11 @@ function getTripInfoEndDate(routePoints) {
 }
 
 
+function capitalizeFirstLetter(word) {
+  return `${word[0].toUpperCase()}${word.slice(1)}`;
+}
+
+
 export {
   humanizeDate, getDateDuration, isFutureDate, isPastDate, isPresentDate,
   getRoutePointsDayDifference, getRoutePointsEventDifference, getRoutePointsPriceDifference,
@@ -168,4 +173,5 @@ export {
   updateRoutePoints,
   isMinorUpdate,
   adaptToServer, adaptToClient,
+  capitalizeFirstLetter
 };
