@@ -1,5 +1,5 @@
 import { render } from '../framework/render';
-import CreateRoutePointButtonView from '../view/create-point-button-view';
+import CreateRoutePointButtonView from '../view/create-route-point-button-view';
 
 export default class CreateRoutePointButtonPresenter {
   #container = null;

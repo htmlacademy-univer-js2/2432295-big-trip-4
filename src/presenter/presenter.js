@@ -6,7 +6,7 @@ import { sortRoutePoints } from '../utils.js';
 
 import SortPresenter from './sort-presenter.js';
 import RoutePointPresenter from './route-point-presenter';
-import CreateRoutePointPresenter from './create-point-presenter.js';
+import CreateRoutePointPresenter from './create-route-point-presenter.js';
 
 import RoutePointsListView from '../view/route-points-list-view.js';
 import EmptyRoutePointsView from '../view/empty-route-point-list-view.js';
