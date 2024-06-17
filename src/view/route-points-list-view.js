@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view';
-import { createRoutePointsListTemplate } from '../template/route-points-list-template';
+import { createRoutePointsListTemplate } from '../template/create-route-points-list-template';
 
 
 export default class RoutePointsListView extends AbstractView{

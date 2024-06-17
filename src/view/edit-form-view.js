@@ -1,5 +1,5 @@
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
-import { createEditFormTemplate } from '../template/edit-form-template';
+import { createEditFormTemplate } from '../template/create-edit-form-template.js';
 import { POINT_EMPTY, MODE } from '../const';
 
 import flatpickr from 'flatpickr';

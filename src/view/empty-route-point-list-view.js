@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view.js';
-import { createEmptyRoutePointsListTemplate } from '../template/empty-route-point-list-template.js';
+import { createEmptyRoutePointsListTemplate } from '../template/create-empty-route-point-list-template.js';
 
 
 export default class EmptyRoutePointsView extends AbstractView {
