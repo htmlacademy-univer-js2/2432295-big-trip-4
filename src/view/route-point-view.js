@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view';
-import { createRoutePointTemplate } from '../template/route-point-template';
+import { createRoutePointTemplate } from '../template/create-route-point-template';
 
 export default class RoutePointView extends AbstractView {
   constructor({ routePoint, offers, destination, onEditClick, onFavoriteClick }) {

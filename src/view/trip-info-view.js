@@ -1,5 +1,5 @@
 import AbstractView from '../framework/view/abstract-view';
-import { createTripInfoTemplate } from '../template/trip-info-template';
+import { createTripInfoTemplate } from '../template/create-trip-info-template';
 
 export default class TripInfoView extends AbstractView {
   constructor(routePoints, destinations, offers) {
