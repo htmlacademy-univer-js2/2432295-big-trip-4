@@ -164,6 +164,7 @@ export default class RoutePointPresenter {
     remove(this.#routePointComponent);
     remove(this.#editRoutePointComponent);
     this.#editRoutePointComponent.removeElement();
+    document.removeEventListener('keydown', this.#escKeyHandler);
   }
 
 
